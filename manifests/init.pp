@@ -339,7 +339,11 @@ class ff_gw::radvd($own_ipv6) {
   }
 }
 
-class ff_gw::vpn($openvpn_version, $vpnname, $ca_crt, $usr_crt, $usr_key, $ensure = 'running') {
+class ff_gw::vpn($ca_crt, $usr_crt, $usr_key, $openvpn_version = '2.3.2-7~bpo70+1', $ensure = 'running') {
+  # TODO: this name is used in several places including dnsmasq
+  # and is even used for other providers, thus hard to change
+  $vpnname = 'mullvad'
+
   package {
     'openvpn':
       ensure => $openvpn_version;
