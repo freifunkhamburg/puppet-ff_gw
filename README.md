@@ -22,7 +22,8 @@ page), and credentials for fastd and openvpn.
 
 Example puppet code:
 
-```class { 'ff_gw':
+```
+class { 'ff_gw':
     # user accounts:
     accounts => {
         mschuett => {
@@ -52,3 +53,4 @@ MIIE ...
 -----END CERTIFICATE-----',
 }
 ```
+
