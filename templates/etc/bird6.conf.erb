@@ -77,3 +77,11 @@ protocol bgp <%= key %> from <%= hash["template"] %> {
   neighbor <%= hash["ip"] %> as <%= hash["as"] %>;
 };
 <% end -%><% end -%>
+
+<% if @gw_do_ic_peering -%>
+<% @ic_peerings_v6.each_pair do |key, hash| -%><% if hash["ip"] != @own_ipv6 -%>
+protocol bgp <%= key %> from <%= hash["template"] %> {
+  neighbor <%= hash["ip"] %> as <%= hash["as"] %>;
+};
+<% end -%><% end -%>
+<% end -%>

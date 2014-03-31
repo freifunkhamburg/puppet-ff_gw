@@ -1,4 +1,4 @@
-class ff_gw($mesh_mac, $gw_ipv4, $gw_ipv6, $secret_key, $dhcprange_start, $dhcprange_end) {
+class ff_gw($mesh_mac, $gw_ipv4, $gw_ipv6, $secret_key, $dhcprange_start, $dhcprange_end, $gw_do_ic_peering = false) {
   class { 'ff_gw::apt': }
   ->
   class { 'ff_gw::software': }
@@ -27,8 +27,9 @@ class ff_gw($mesh_mac, $gw_ipv4, $gw_ipv6, $secret_key, $dhcprange_start, $dhcpr
   class { 'ff_gw::dnsmasq': }
   ->
   class { 'ff_gw::bird':
-    own_ipv4 => $gw_ipv4,
-    own_ipv6 => $gw_ipv6,
+    own_ipv4         => $gw_ipv4,
+    own_ipv6         => $gw_ipv6,
+    gw_do_ic_peering => $gw_do_ic_peering,
   }
 }
 
@@ -419,7 +420,7 @@ exit 0';
   }
 }
 
-class ff_gw::bird($own_ipv4, $own_ipv6, $version = 'present') {
+class ff_gw::bird($own_ipv4, $own_ipv6, $gw_do_ic_peering, $version = 'present') {
   # read peering data from data file
   $module_path = get_module_path($module_name)
   $peeringdata = loadyaml("${module_path}/data/peering.yaml")
