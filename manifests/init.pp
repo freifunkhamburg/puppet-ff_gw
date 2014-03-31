@@ -419,7 +419,15 @@ exit 0';
   }
 }
 
-class ff_gw::bird($own_ipv4, $own_ipv6, $peerings_v4, $peerings_v6, $version = 'present') {
+class ff_gw::bird($own_ipv4, $own_ipv6, $version = 'present') {
+  # read peering data from data file
+  $module_path = get_module_path($module_name)
+  $peeringdata = loadyaml("${module_path}/data/peering.yaml")
+  $peerings_v4 = $peeringdata[peerings_v4]
+  $peerings_v6 = $peeringdata[peerings_v6]
+  $ic_peerings_v4 = $peeringdata[ic_peerings_v4]
+  $ic_peerings_v6 = $peeringdata[ic_peerings_v6]
+
   package {
     'bird6':
       ensure => $version,
