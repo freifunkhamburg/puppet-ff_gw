@@ -1,0 +1,79 @@
+# managed by puppet
+#
+# the ff ip of the gateway
+router id <%= @own_ipv4 %>;
+
+# routing tables
+table ffhh;
+
+# filter to check ulas
+function is_ula() {
+  return (net ~ [ fc00::/7{48,64} ]);
+}
+
+function is_self() {
+  return (proto = "static_ffhh");
+}
+
+filter ffhh_internal_export {
+  if (proto = "local_ffhh") then accept;
+  if (source != RTS_BGP) then reject;
+  if (is_ula() && proto != "static_ffhh") then accept;
+  else reject;
+}
+
+# don't use kernel's routes for bird, but export bird's routes to kernel
+protocol kernel {
+  scan time 20;  # Scan kernel routing table every 20 seconds
+  import none;  # Default is import all
+  export all;
+}
+
+# This pseudo-protocol watches all interface up/down events.
+protocol device {
+  scan time 10;  # Scan interfaces every 10 seconds
+}
+
+# define our routes
+protocol static static_ffhh {
+  table ffhh;
+  # reject route if announced from external
+  route fd51:2bb2:fd0d::/48 reject;
+};
+
+protocol static local_ffhh {
+  table ffhh;
+  route fd51:2bb2:fd0d::/64 via "br-ffhh";
+};
+
+protocol pipe pipe_ffhh {
+  peer table ffhh;
+  import all;
+  export none;
+};
+
+# template for internal routing
+template bgp bgp_ibgp {
+  table ffhh;
+  local as 65112;
+  source address <%= @own_ipv6 %>;
+  import all;
+  export where source = RTS_BGP;
+  gateway direct;
+  next hop self;
+};
+
+# icvpn template for hamburg03
+template bgp bgp_icvpn {
+  local as 65112;
+  source address <%= @own_ipv6 %>;
+  table ffhh;
+  import where is_ula();
+  export where is_self() || (source = RTS_BGP);
+};
+
+<% @peerings_v6.each_pair do |key, hash| -%><% if hash["ip"] != @own_ipv6 -%>
+protocol bgp <%= key %> from <%= hash["template"] %> {
+  neighbor <%= hash["ip"] %> as <%= hash["as"] %>;
+};
+<% end -%><% end -%>

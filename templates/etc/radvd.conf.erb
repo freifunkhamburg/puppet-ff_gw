@@ -1,0 +1,15 @@
+# managed by puppet
+interface br-ffhh
+{    
+ AdvSendAdvert on;
+
+ MaxRtrAdvInterval 200;
+
+ prefix fd51:2bb2:fd0d::/64 {
+ };
+
+ RDNSS <%= @own_ipv6 %> {
+ };
+};
+
+# vim: noai:ts=4:sw=4:ff=unix:ft=text:fdm=marker

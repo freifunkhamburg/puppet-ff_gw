@@ -1,0 +1,16 @@
+# managed by puppet -- editing is futile
+
+log to syslog level info;
+interface "ffhh-mesh-vpn";
+method "salsa2012+gmac"; # new method, between gateways for the moment (faster)
+method "xsalsa20-poly1305"; # old method
+bind 0.0.0.0:10000;
+hide ip addresses yes;
+hide mac addresses yes;
+include "secret.conf";
+mtu 1426; # 1492 - IPv4 Header - fastd Header...
+include peers from "peers";
+on up "
+ ifup bat0
+ ip link set address <%= @mesh_mac %> up dev $INTERFACE
+";
