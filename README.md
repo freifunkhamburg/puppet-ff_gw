@@ -16,11 +16,36 @@ design pattern.
 
 Install as a puppet module, then include with node-specific parameters.
 
+### Dependencies
+
+Install Puppet and some required modules with:
+
+```
+apt-get install puppet
+puppet module install puppetlabs-stdlib
+puppet module install puppetlabs-apt
+puppet module install puppetlabs-vcsrepo
+puppet module install saz-sudo
+puppet module install torrancew-account
+```
+
+Then add this module (which is not in the puppet forge, so it has to be
+downloaded manually):
+
+```
+cd /etc/puppet/modules
+git clone https://github.com/freifunkhamburg/puppet-ff_gw.git ff_gw
+```
+
+### Parameters
+
+Now include the module in your manifest and provide all parameters.
 Basically there are three kinds of parameters: user accounts (optional if you
 do manual user management), network config (has to be in sync with the wiki
 page), and credentials for fastd and openvpn.
 
-Example puppet code:
+
+Example puppet code (save e.g. as `/etc/puppet/gw.pp`):
 
 ```
 class { 'ff_gw':
@@ -53,4 +78,16 @@ MIIE ...
 -----END CERTIFICATE-----',
 }
 ```
+
+### Run Puppet
+
+To apply the puppet manifest (e.g. saved as `gw.pp`) run:
+
+```
+puppet apply --verbose gw.pp
+```
+
+The verbose flag is optional and shows all changes.
+To be even more catious you can also add the `--noop` flag to only show changes
+but not apply them.
 
