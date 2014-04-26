@@ -2,7 +2,7 @@ table ibgp; # internal BGP peerings
 table ebgp; # external (icvpn) BGP peerings
 table freifunk; # kernel table 42 for routing from ff network
 
-define ownas = 65112;
+define ownas = <%= @ff_as %>;
 
 router id <%= @own_ipv4 %>;
 
@@ -10,7 +10,7 @@ router id <%= @own_ipv4 %>;
 
 # own network
 function is_self_net() {
-    return (net ~ [10.112.0.0/16+]);
+    return (net ~ [<%= @ff_net %>+]);
 }
 
 # freifunk ip ranges in general
@@ -115,14 +115,14 @@ protocol static unreachable_default {
 };
 
 protocol static static_ffhh {  
-  route 10.112.0.0/16 reject;
+  route <%= @ff_net %> reject;
   table ebgp;
 };
 
 # in hamburg we use a /18 from our /16 in the mesh
 # create a route for that in freifunk table
 protocol static local_ffhh {
-  route 10.112.0.0/18 via "br-ffhh";
+  route <%= @ff_mesh_net %> via "br-ffhh";
   table freifunk;
 };
 
@@ -155,7 +155,7 @@ template bgp peers {
 
 <% @peerings_v4.each_pair do |key, hash| -%><% if hash["ip"] != @own_ipv4 -%>
 protocol bgp <%= key %> from <%= hash["template"] %> {
-  neighbor <%= hash["ip"] %> as <%= hash["as"] %>;
+  neighbor <%= hash["ip"] %> as ownas;
 };
 <% end -%><% end -%>
 
