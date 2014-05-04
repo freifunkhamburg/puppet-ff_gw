@@ -26,7 +26,6 @@ function is_dn42() {
     195.160.168.0/23+,
     91.204.4.0/22+,
     193.43.220.0/23+,
-    83.133.178.0/23+,
     87.106.29.254/32,
     85.25.246.16/28+,
     46.4.248.192/27+,
@@ -47,13 +46,30 @@ function is_dn42() {
   ];
 }
 
+# chaosvpn ranges
+function is_chaos() {
+  return net ~ [ 10.4.0.0/16+,
+    10.32.0.0/16+,
+    10.100.0.0/14+,
+    10.104.0.0/14+,
+    172.31.0.0/16+,
+    83.133.178.0/23+,
+    172.26.0.0/15+,
+    176.9.52.58/32+,
+    193.103.159.0/24+,
+    193.103.160.0/23+,
+    212.12.50.208/29+,
+    213.238.61.128/26+
+  ];
+}
+
 ### kernel ###
 
 # synchronize from bird to main kernel routing table
 # nothing in the other direction
 protocol kernel k_mast {
     scan time 10;
-    import none;
+    import where is_chaos();
     export filter {
         krt_prefsrc = <%= @own_ipv4 %>;
         accept;
@@ -97,13 +113,13 @@ protocol pipe p_ibgptbl {
   export where !is_self_net();
 };
 
-# sync routes (freifunk and dn42) from ibgp to freifunk
+# sync routes (freifunk, dn42 and chaosvpn) from ibgp to freifunk
 # sync nothing from freifunk to ibgp
 protocol pipe p_freitbl {
   table ibgp;
   peer table freifunk;
   import none;
-  export where (is_freifunk() || is_dn42());
+  export where (is_freifunk() || is_dn42() || is_chaos());
 };
 
 ### static routes ###
@@ -146,8 +162,8 @@ template bgp peers {
   table ebgp;
   local as ownas;
   # ignore routes for our own network
-  import where ((is_freifunk() || is_dn42()) && !is_self_net());
-  export where (is_freifunk() || is_dn42());
+  import where ((is_freifunk() || is_dn42() || is_chaos()) && !is_self_net());
+  export where  (is_freifunk() || is_dn42() || is_chaos());
   route limit 10000;
 };
 
