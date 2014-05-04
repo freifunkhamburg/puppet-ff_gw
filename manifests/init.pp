@@ -1,4 +1,4 @@
-class ff_gw($mesh_mac, $gw_ipv4, $gw_ipv6, $secret_key, $dhcprange_start, $dhcprange_end, $gw_do_ic_peering = false) {
+class ff_gw($ff_net, $ff_mesh_net, $ff_as, $mesh_mac, $gw_ipv4, $gw_ipv6, $secret_key, $dhcprange_start, $dhcprange_end, $gw_do_ic_peering = false) {
   class { 'ff_gw::apt': }
   ->
   class { 'ff_gw::software': }
@@ -27,6 +27,9 @@ class ff_gw($mesh_mac, $gw_ipv4, $gw_ipv6, $secret_key, $dhcprange_start, $dhcpr
   class { 'ff_gw::dnsmasq': }
   ->
   class { 'ff_gw::bird':
+    ff_net           => $ff_net,
+    ff_mesh_net      => $ff_mesh_net,
+    ff_as            => $ff_as,
     own_ipv4         => $gw_ipv4,
     own_ipv6         => $gw_ipv6,
     gw_do_ic_peering => $gw_do_ic_peering,
@@ -44,6 +47,12 @@ class ff_gw::apt() {
     repos      => 'main',
     key        => 'AB7A88C5B89033D8',
     key_server => 'pgpkeys.mit.edu',
+  }
+  # bird repo
+  apt::source { 'bird-network':
+    location   => 'http://bird.network.cz/debian/',
+    release    => 'wheezy',
+    repos      => 'main',
   }
 }
 
@@ -424,7 +433,7 @@ exit 0';
   }
 }
 
-class ff_gw::bird($own_ipv4, $own_ipv6, $gw_do_ic_peering, $version = 'present') {
+class ff_gw::bird($ff_net, $ff_mesh_net, $ff_as, $own_ipv4, $own_ipv6, $gw_do_ic_peering, $version = 'present') {
   # read peering data from data file
   $module_path = get_module_path($module_name)
   $peeringdata = loadyaml("${module_path}/data/peering.yaml")

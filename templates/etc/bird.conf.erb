@@ -1,146 +1,165 @@
+table ibgp; # internal BGP peerings
+table ebgp; # external (icvpn) BGP peerings
+table freifunk; # kernel table 42 for routing from ff network
+
+define ownas = <%= @ff_as %>;
+
 router id <%= @own_ipv4 %>;
 
-table ffhh; # BGP Peerings
-table ibgp;
-table icvpn; # BGP Peerings (ICVPN)
-table freifunk; # Kernel table 42 (Routing from Freifunk networks)
+### functions ###
 
-function is_freifunk_dn42() {
-    return (net ~ [
-        10.0.0.0/8{12,32},
-        10.100.0.0/14,
-        172.22.0.0/15+,
-        172.31.0.0/16
-        ]);
-}
-
-function is_freifunk() {
-    return (net ~ [10.0.0.0/8+]);
-}
-
-function is_chaosvpn() {
-    return (net ~ [172.31.0.0/16+]);
-}
-
+# own network
 function is_self_net() {
-    return (net ~ [10.112.0.0/16+]);
+    return (net ~ [<%= @ff_net %>+]);
 }
 
-function is_self() {
-    return (proto = "static_ffhh");
+# freifunk ip ranges in general
+function is_freifunk() {
+  return net ~ [ 10.0.0.0/8+,
+    104.0.0.0/8+
+  ];
 }
 
-function is_dn42_aggregate() {
-    return (net ~ [172.22.0.0/15{16,32}]);
+# dn42 ip ranges
+function is_dn42() {
+  return net ~ [ 172.22.0.0/15+,
+    195.160.168.0/23+,
+    91.204.4.0/22+,
+    193.43.220.0/23+,
+    83.133.178.0/23+,
+    87.106.29.254/32,
+    85.25.246.16/28+,
+    46.4.248.192/27+,
+    94.45.224.0/19+,
+    195.191.196.0/23+,
+    80.244.241.224/27+,
+    46.19.90.48/28+,
+    46.19.90.96/28+,
+    178.63.170.40/32,
+    188.40.34.241/32,
+    195.16.84.40/29+,
+    37.1.89.160/29+,
+    178.33.32.123/32+,
+    37.1.89.160/29+,
+    185.28.77.16/29+,
+    185.28.77.192/27+,
+    192.175.48.0/24+
+  ];
 }
 
-filter ffhh_internal_export {
-    if (proto = "dn42_aggregate_ffhh" || proto = "local_ffhh") then accept;
-    if (source != RTS_BGP && proto != "pipe_icvpn") then reject; 
-    if (proto ~ "bgp_ibgp_*") then reject;
-    if (is_dn42_aggregate()) then reject;
-    accept;
-}
+### kernel ###
 
+# synchronize from bird to main kernel routing table
+# nothing in the other direction
+protocol kernel k_mast {
+    scan time 10;
+    import none;
+    export filter {
+        krt_prefsrc = <%= @own_ipv4 %>;
+        accept;
+    };
+};
 
-protocol pipe pipe_ffhh {
-    peer table ffhh;
-    import all;
+# synchronize from birds freifunk table to kernel routing table 42
+# nothing in the other direction
+protocol kernel k_frei {
+    scan time 10;
+    table freifunk;
+    kernel table 42;
+    import none;
+    export filter {
+        krt_prefsrc = <%= @own_ipv4 %>;
+        accept;
+    };
+};
+
+# this pseudo-protocol watches all interface up/down events
+protocol device {
+    scan time 10;
+};
+
+### pipes ###
+
+# sync nothing from main routing table to ebgp
+# sync routes (not own network) from ebgp to main routing table
+protocol pipe p_maintbl {
+    peer table ebgp;
+    import where !is_self_net();
     export none;
 };
 
-protocol pipe pipe_icvpn {
-    table ffhh;
-    peer table icvpn;
-    export where is_self();
-    import all;
-    mode opaque;
+# sync routes (not own network) from ebgp to ibgp
+# sync routes (all) from ibgp to ebgp
+protocol pipe p_ibgptbl {
+  table ebgp;
+  peer table ibgp;
+  import all;
+  export where !is_self_net();
 };
 
-protocol pipe pipe_freifunk {
-    peer table freifunk;
-    import none;
-    export all;
+# sync routes (freifunk and dn42) from ibgp to freifunk
+# sync nothing from freifunk to ibgp
+protocol pipe p_freitbl {
+  table ibgp;
+  peer table freifunk;
+  import none;
+  export where (is_freifunk() || is_dn42());
 };
 
-protocol pipe pipe_ibgp {
-    peer table ibgp;
-    import all;
-    export where !is_self_net();
-    mode opaque;
-};
+### static routes ###
 
-protocol kernel kernel_master {
-    scan time 20;
-    import none;
-    export filter {
-        krt_prefsrc = <%= @own_ipv4 %>;
-        accept;
-    };
-};
-
-protocol kernel kernel_freifunk {
-    scan time 20;
-    import none;
-    export filter {
-        krt_prefsrc = <%= @own_ipv4 %>;
-        accept;
-    };
-    table freifunk;
-    device routes;
-    kernel table 42;
-};
-
-# This pseudo-protocol watches all interface up/down events.
-protocol device {
-    scan time 10;       # Scan interfaces every 10 seconds
-};
-
+# if no openvpn is running, reject everything we do not have a route for
 protocol static unreachable_default {
-    table freifunk;
-    route 0.0.0.0/0 reject;
+  route 0.0.0.0/0 reject;
+  table freifunk;
 };
 
-protocol static static_ffhh {
-    table ffhh;
-    route 10.112.0.0/16 reject;
+protocol static static_ffhh {  
+  route <%= @ff_net %> reject;
+  table ebgp;
 };
 
+# in hamburg we use a /18 from our /16 in the mesh
+# create a route for that in freifunk table
 protocol static local_ffhh {
-    table ffhh;
-    route 10.112.0.0/18 via "freifunk";
+  route <%= @ff_mesh_net %> via "br-ffhh";
+  table freifunk;
 };
 
-protocol static dn42_aggregate_ffhh {
-    table ffhh;
-    route 172.22.0.0/15 reject;
+### templates ###
+
+# template for same city freifunk gateways
+template bgp locals {
+  table ibgp;
+  local as ownas;
+  import filter {
+    preference = 99;
+    accept;
+  };
+  export where source = RTS_BGP;
+  direct;
+  next hop self;
 };
 
-
-template bgp bgp_ibgp {
-    local as 65112;
-    table ibgp;
-    import filter {
-        preference = 99;
-        accept;
-    };
-    export all;
-    gateway direct;
-    next hop self;
+# template for icvpn gateways of other cities
+template bgp peers {
+  table ebgp;
+  local as ownas;
+  # ignore routes for our own network
+  import where ((is_freifunk() || is_dn42()) && !is_self_net());
+  export where (is_freifunk() || is_dn42());
+  route limit 10000;
 };
 
-template bgp bgp_icvpn {
-    local as 65112;
-    table icvpn;
-    import where (is_freifunk_dn42() && !is_self_net());
-    export all;
-};
+### local gateways ###
 
 <% @peerings_v4.each_pair do |key, hash| -%><% if hash["ip"] != @own_ipv4 -%>
 protocol bgp <%= key %> from <%= hash["template"] %> {
-  neighbor <%= hash["ip"] %> as <%= hash["as"] %>;
+  neighbor <%= hash["ip"] %> as ownas;
 };
 <% end -%><% end -%>
+
+### icvpn peerings ###
 
 <% if @gw_do_ic_peering -%>
 <% @ic_peerings_v4.each_pair do |key, hash| -%><% if hash["ip"] != @own_ipv4 -%>

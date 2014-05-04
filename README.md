@@ -58,6 +58,14 @@ class { 'ff_gw':
         }
     },
 
+    # freifunk config
+    # the network assigned to the ff community
+    ff_net          => '10.112.0.0/16',
+    # the network actually used in the mesh might be smaller than ff_net
+    ff_mesh_net     => '10.112.0.0/18',
+    # as number for icvpn peering
+    ff_as           => '65112',
+
     # network config (example data for gw12)
     mesh_mac        => 'de:ad:be:ef:01:14',
     gw_ipv4         => '10.112.30.1',
