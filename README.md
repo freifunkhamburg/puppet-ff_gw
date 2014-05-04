@@ -88,9 +88,9 @@ MIIE ...
     vpn_usr_crt     => '-----BEGIN CERTIFICATE-----
 MIIE ...
 -----END CERTIFICATE-----',
-    vpn_usr_key     => '-----BEGIN CERTIFICATE-----
+    vpn_usr_key     => '-----BEGIN PRIVATE KEY-----
 MIIE ...
------END CERTIFICATE-----',
+-----END PRIVATE KEY-----',
 }
 ```
 
