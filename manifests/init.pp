@@ -377,6 +377,7 @@ class ff_gw::vpn($ca_crt, $usr_crt, $usr_key, $openvpn_version = '2.3.2-7~bpo70+
       content => '#!/bin/sh
 ip route replace 0.0.0.0/1 via $5 table 42
 ip route replace 128.0.0.0/1 via $5 table 42
+/usr/sbin/service dnsmasq restart
 exit 0';
     "/etc/openvpn/${vpnname}.conf":
       ensure => file,
