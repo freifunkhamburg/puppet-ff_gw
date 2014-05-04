@@ -1,6 +1,5 @@
 # kitchen sink class for various small settings
-class ff_gw::sysadmin($zabbixserver = '127.0.0.1', $muninserver = '127.0.0.1') {
-
+class ff_gw::sysadmin($zabbixserver = '127.0.0.1', $muninserver = '127.0.0.1', $accounts = {}) {
   # use Hiera as a Puppet data source
   file {
     '/etc/puppet/hiera.yaml':
@@ -24,6 +23,8 @@ class ff_gw::sysadmin($zabbixserver = '127.0.0.1', $muninserver = '127.0.0.1') {
       ensure => installed,
   }
 
+  # user accounts
+  create_resources('account', $accounts)
   # Sudo
   include sudo
   sudo::conf { 'admins':

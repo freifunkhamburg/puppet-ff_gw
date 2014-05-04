@@ -53,10 +53,8 @@ class { 'ff_gw::sysadmin':
     # both optional, used for FFHH monitoring:
     zabbixserver => 'argos.mschuette.name',
     muninserver  => '78.47.49.236',
-}
 
-class { 'ff_gw':
-    # user accounts:
+    # also optional, let puppet control user accounts:
     accounts => {
         mschuett => {
             comment => 'Martin Schuette',
@@ -64,7 +62,9 @@ class { 'ff_gw':
             groups => ['sudo', 'users'],
         }
     },
+}
 
+class { 'ff_gw':
     # freifunk config
     # the network assigned to the ff community
     ff_net          => '10.112.0.0/16',
