@@ -1,313 +1,313 @@
 peerings_v4:
   srv01:
-    template: bgp_ibgp
+    template: locals
     ip: 10.112.1.1
   hamburg01:
-    template: bgp_ibgp
+    template: locals
     ip: 10.112.14.1
   hamburg05:
-    template: bgp_ibgp
+    template: locals
     ip: 10.112.18.1
   hamburg07:
-    template: bgp_ibgp
+    template: locals
     ip: 10.112.16.1
   hamburg08:
-    template: bgp_ibgp
+    template: locals
     ip: 10.112.22.1
   hamburg09:
-    template: bgp_ibgp
+    template: locals
     ip: 10.112.24.1
   hamburg11:
-    template: bgp_ibgp
+    template: locals
     ip: 10.112.28.1
   hamburg12:
-    template: bgp_ibgp
+    template: locals
     ip: 10.112.30.1
 
 # TODO: add this as a second param for intercity gateways
 ic_peerings_v4:
   Augsburg1:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.17
     as: 65050
   Augsburg2:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.177
     as: 65070
   Aurich1:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.15
     as: 65047
   BadZwischenahn1:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.26
     as: 65512
   Bayreuth1:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.28
     as: 65025
   Berlin1:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.5
     as: 44194
   Bielefeld1:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.59
     as: 65529
   Bielefeld2:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.67
     as: 65529
   Chemnitz1:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.36
     as: 65053
   diac24_net:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.2.0
     as: 64600
   Dresden1:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.19
     as: 65051
   Franken1:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.23
     as: 65024
   Franken2:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.24
     as: 65024
   Franken3:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.31
     as: 65024
   Frankfurt1:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.35
     as: 65026
   Freiburg1:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.21
     as: 65026
   Gronau1:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.55
     as: 65526
   Gronau2:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.60
     as: 65526
   Grossdraxdorf:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.25
     as: 65025
   Halle1:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.13
     as: 65046
   Halle2:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.14
     as: 65046
   Hannover1:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.22
     as: 65511
   Jena1:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.33
     as: 65055
   Jena2:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.66
     as: 65055
   Kiel4:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.58
     as: 65525
   Koblenz:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.32
     as: 65032
   Koeln1:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.57
     as: 65528
   Leipzig1:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.1
     as: 65041
   Leipzig2:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.2
     as: 65041
   Ljubljana1:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.3.23
     as: 65023
   Ljubljana2:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.3.30
     as: 64768
   Luebeck1:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.130
     as: 65052
   Luebeck2:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.131
     as: 65052
   Mainz1:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.37
     as: 65037
   Oldenburg1:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.27
     as: 65513
   Schwarzach1:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.56
     as: 65527
   Treuenbrietzen:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.18
     as: 65045
   Weimar1:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.3
     as: 65042
   Weimar2:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.4
     as: 65042
   Wermelskirchen1:
-    template: bgp_icvpn
+    template: peers
     ip: 10.207.0.7
     as: 65530
 
 
 peerings_v6:
   srv01:
-    template: bgp_ibgp
+    template: locals
     ip: fd51:2bb2:fd0d::101
     as: 65112
   hamburg01:
-    template: bgp_ibgp
+    template: locals
     ip: fd51:2bb2:fd0d::e01
     as: 65112
   hamburg05:
-    template: bgp_ibgp
+    template: locals
     ip: fd51:2bb2:fd0d::d01
     as: 65112
   hamburg07:
-    template: bgp_ibgp
+    template: locals
     ip: fd51:2bb2:fd0d::a01
     as: 65112
   hamburg08:
-    template: bgp_ibgp
+    template: locals
     ip: fd51:2bb2:fd0d::b01                                                                                             
     as: 65112
   hamburg09:
-    template: bgp_ibgp
+    template: locals
     ip: fd51:2bb2:fd0d::901
     as: 65112
   hamburg11:
-    template: bgp_ibgp
+    template: locals
     ip: fd51:2bb2:fd0d::601
     as: 65112
   hamburg12:
-    template: bgp_ibgp
+    template: locals
     ip: fd51:2bb2:fd0d::501
     as: 65112
 
 ic_peerings_v6:
   Augsburg1:
-    template: bgp_icvpn
+    template: peers
     ip: fec0::a:cf:0:a
     as: 65050
   Bayreuth:
-    template: bgp_icvpn
+    template: peers
     ip: fec0::a:cf:0:19
     as: 65025
   Berlin1:
-    template: bgp_icvpn
+    template: peers
     ip: fec0::a:cf:0:5
     as: 44194
   Bielefeld1:
-    template: bgp_icvpn
+    template: peers
     ip: fec0::a:cf:0:59
     as: 65529
   Bielefeld2:
-    template: bgp_icvpn
+    template: peers
     ip: fec0::a:cf:0:60
     as: 65529
   diac24:
-    template: bgp_icvpn
+    template: peers
     ip: fec0::a:cf:ac:16
     as: 64600
   Franken1:
-    template: bgp_icvpn
+    template: peers
     ip: fec0::a:cf:0:17
     as: 65024
   Franken2:
-    template: bgp_icvpn
+    template: peers
     ip: fec0::a:cf:0:18
     as: 65024
   Freiburg1:
-    template: bgp_icvpn
+    template: peers
     ip: fec0::a:cf:0:21
     as: 65060
   Gronau1:
-    template: bgp_icvpn
+    template: peers
     ip: fec0::a:cf:0:50
     as: 65526
   Gronau2:
-    template: bgp_icvpn
+    template: peers
     ip: fec0::a:cf:0:51
     as: 65526
   Kiel1:
-    template: bgp_icvpn
+    template: peers
     ip: fec0::a:cf:0:35
     as: 65525
   Kiel3:
-    template: bgp_icvpn
+    template: peers
     ip: fec0::a:cf:0:36
     as: 65525
   Kiel4:
-    template: bgp_icvpn
+    template: peers
     ip: fec0::a:cf:0:3a
     as: 65525
   Koeln:
-    template: bgp_icvpn
+    template: peers
     ip: fec0::a:cf:0:57
     as: 65528
   Ljubljana1:
-    template: bgp_icvpn
+    template: peers
     ip: fec0::a:cf:3:23
     as: 65023
   Ljubljana2:
-    template: bgp_icvpn
+    template: peers
     ip: fec0::a:cf:3:30
     as: 64768
   Luebeck1:
-    template: bgp_icvpn
+    template: peers
     ip: fec0::a:cf:0:82
     as: 65052
   Luebeck2:
-    template: bgp_icvpn
+    template: peers
     ip: fec0::a:cf:0:83
     as: 65052
   Schwarzach:
-    template: bgp_icvpn
+    template: peers
     ip: fec0::a:cf:0:56
     as: 65527
   Weimar1:
-    template: bgp_icvpn
+    template: peers
     ip: fec0::a:cf:0:3
     as: 65042
   Wermelskirchen1:
-    template: bgp_icvpn
+    template: peers
     ip: fec0::a:cf:0:7
     as: 65530
