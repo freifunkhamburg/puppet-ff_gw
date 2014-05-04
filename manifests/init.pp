@@ -1,4 +1,4 @@
-class ff_gw($ff_net, $ff_mesh_net, $ff_as, $mesh_mac, $gw_ipv4, $gw_ipv6, $secret_key, $dhcprange_start, $dhcprange_end, $gw_do_ic_peering = false) {
+class ff_gw($ff_net, $ff_mesh_net, $ff_as, $mesh_mac, $gw_ipv4, $gw_ipv6, $secret_key, $vpn_ca_crt, $vpn_usr_crt, $vpn_usr_key, $dhcprange_start, $dhcprange_end, $gw_do_ic_peering = false) {
   class { 'ff_gw::apt': }
   ->
   class { 'ff_gw::software': }
@@ -20,7 +20,11 @@ class ff_gw($ff_net, $ff_mesh_net, $ff_as, $mesh_mac, $gw_ipv4, $gw_ipv6, $secre
     own_ipv6 => $gw_ipv6,
   }
   ->
-  class { 'ff_gw::vpn': }
+  class { 'ff_gw::vpn':
+	usr_crt => $vpn_usr_crt,
+	usr_key => $vpn_usr_key,
+    ca_crt  => $vpn_ca_crt,
+  }
   ->
   class { 'ff_gw::iptables': }
   ->
