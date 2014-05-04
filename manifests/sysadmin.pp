@@ -63,6 +63,7 @@ class ff_gw::sysadmin {
     ensure  => file,
     content => "# managed by puppet
 Server=argos.mschuette.name
+ServerActive=argos.mschuette.name
 HostnameItem=${::hostname}
 ";
   }
