@@ -1,5 +1,5 @@
 # kitchen sink class for various small settings
-class ff_gw::sysadmin {
+class ff_gw::sysadmin($zabbixserver = '127.0.0.1', $muninserver = '127.0.0.1') {
 
   # use Hiera as a Puppet data source
   file {
@@ -62,8 +62,8 @@ class ff_gw::sysadmin {
   file { '/etc/zabbix/zabbix_agentd.d/argos_monitoring.conf':
     ensure  => file,
     content => "# managed by puppet
-Server=argos.mschuette.name
-ServerActive=argos.mschuette.name
+Server=${zabbixserver}
+ServerActive=${zabbixserver}
 HostnameItem=${::hostname}
 ";
   }
@@ -106,7 +106,7 @@ ignore_file \.pod$
 port 4949
 
 host_name <%= @fqdn %>
-cidr_allow 78.47.49.236/32
+cidr_allow <%= @muninserver %>/32
 host <%= @ipaddress_eth0 %>
 ');
     '/usr/share/munin/plugins/vnstat_':
