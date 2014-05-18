@@ -54,6 +54,10 @@ class { 'ff_gw::sysadmin':
     zabbixserver => 'argos.mschuette.name',
     muninserver  => '78.47.49.236',
 
+    # optional, configure hostname and public IP
+    sethostname => 'gw12.hamburg.freifunk.net',
+    setip       => '5.45.105.34',
+
     # also optional, let puppet control user accounts:
     accounts => {
         mschuett => {

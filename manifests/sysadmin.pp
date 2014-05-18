@@ -1,10 +1,18 @@
 # kitchen sink class for various small settings
-class ff_gw::sysadmin($zabbixserver = '127.0.0.1', $muninserver = '127.0.0.1', $accounts = {}) {
+class ff_gw::sysadmin($zabbixserver = '127.0.0.1', $muninserver = '127.0.0.1', $sethostname = false, $setip = false, $accounts = {}) {
+  if $sethostname and $setip {
+    # set system hostname
+    class { 'ff_gw::sysadmin::hostname':
+      newname => $sethostname,
+      newip   => $setip,
+    }
+  }
+
   # use backports repo
   apt::source { 'wheezy-backports':
-    location   => 'http://ftp.de.debian.org/debian/',
-    release    => 'wheezy-backports',
-    repos      => 'main',
+    location => 'http://ftp.de.debian.org/debian/',
+    release  => 'wheezy-backports',
+    repos    => 'main',
   }
   # some more packages
   package {
@@ -124,5 +132,51 @@ env.estimate 1';
   service { 'munin-node':
     ensure => running,
     enable => true;
+  }
+}
+
+class ff_gw::sysadmin::hostname($newname, $newip) {
+  # short name
+  $alias = regsubst($newname, '^([^.]*).*$', '\1')
+
+  # clean old names
+  if "$::hostname" != "$alias" {
+    host { "$hostname": ensure => absent }
+  }
+  if "$::fqdn" != "$newname" {
+    host { "$fqdn":     ensure => absent }
+  }
+
+  # rewrite config files:
+  host { "$newname":
+    ensure => present,
+    ip     => $newip,
+    alias  => $alias ? {
+      "$hostname" => undef,
+      default     => $alias
+    },
+    before => Exec['hostname.sh'],
+  }
+
+  file { '/etc/mailname':
+    ensure  => present,
+    owner   => 'root',
+    group   => 'root',
+    mode    => 644,
+    content => "${newname}\n",
+  }
+
+  file { '/etc/hostname':
+    ensure  => present,
+    owner   => 'root',
+    group   => 'root',
+    mode    => 644,
+    content => "${newname}\n",
+    notify  => Exec['hostname.sh'],
+  }
+
+  exec { 'hostname.sh':
+    command     => '/etc/init.d/hostname.sh start',
+    refreshonly => true,
   }
 }
