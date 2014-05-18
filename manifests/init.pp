@@ -49,8 +49,8 @@ class ff_gw::apt() {
     location   => 'http://repo.universe-factory.net/debian/',
     release    => 'sid',
     repos      => 'main',
-    key        => 'AB7A88C5B89033D8',
-    key_server => 'pgpkeys.mit.edu',
+    key        => '16EF3F64CB201D9C',
+    key_server => 'pool.sks-keyservers.net',
   }
   # bird repo
   apt::source { 'bird-network':
