@@ -1,15 +1,5 @@
 # kitchen sink class for various small settings
 class ff_gw::sysadmin($zabbixserver = '127.0.0.1', $muninserver = '127.0.0.1', $accounts = {}) {
-  # use Hiera as a Puppet data source
-  file {
-    '/etc/puppet/hiera.yaml':
-      # content from git repo, not from puppet
-      ensure => file;
-    '/etc/hiera.yaml':
-      ensure => link,
-      target => '/etc/puppet/hiera.yaml';
-  }
-
   # use backports repo
   apt::source { 'wheezy-backports':
     location   => 'http://ftp.de.debian.org/debian/',
