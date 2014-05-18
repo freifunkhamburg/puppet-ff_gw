@@ -21,7 +21,7 @@ Install as a puppet module, then include with node-specific parameters.
 Install Puppet and some required modules with:
 
 ```
-apt-get install puppet
+apt-get install puppet git
 puppet module install puppetlabs-stdlib
 puppet module install puppetlabs-apt
 puppet module install puppetlabs-vcsrepo
