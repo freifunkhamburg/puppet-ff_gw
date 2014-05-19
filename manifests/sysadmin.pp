@@ -39,7 +39,7 @@ class ff_gw::sysadmin($zabbixserver = '127.0.0.1', $muninserver = '127.0.0.1', $
   # then install some basic packages
   package {
     ['vim-nox', 'git', 'etckeeper', 'pv', 'curl', 'atop',
-    'screen', 'tcpdump', 'rsync', 'file']:
+    'screen', 'tcpdump', 'rsync', 'file', 'psmisc']:
       ensure => installed,
   }
 
