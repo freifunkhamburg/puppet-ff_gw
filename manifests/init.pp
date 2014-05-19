@@ -42,7 +42,7 @@ class ff_gw($ff_net, $ff_mesh_net, $ff_as, $mesh_mac, $gw_ipv4, $gw_ipv6, $secre
       tinc_name    => $tinc_name,
       tinc_keyfile => $tinc_keyfile,
       ic_vpn_ip4   => $ic_vpn_ip4,
-      ic_vpn_ip4   => $ic_vpn_ip6
+      ic_vpn_ip6   => $ic_vpn_ip6
     }
   }
 }
