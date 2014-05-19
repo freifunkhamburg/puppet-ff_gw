@@ -491,7 +491,7 @@ class ff_gw::tinc($tinc_name, $tinc_keyfile = '/etc/tinc/rsa_key.priv', $ic_vpn_
       content => template('ff_gw/etc/tinc/icvpn/tinc.conf.erb');
     '/etc/tinc/icvpn/tinc-up':
       ensure  => file,
-      mode    => '0755';
+      mode    => '0755',
       content => inline_template('#!/bin/sh
 /sbin/ip link set dev $INTERFACE up
 /sbin/ip addr add dev $INTERFACE <%= @ic_vpn_ip4 %>/16 broadcast 10.207.255.255
@@ -499,7 +499,7 @@ class ff_gw::tinc($tinc_name, $tinc_keyfile = '/etc/tinc/rsa_key.priv', $ic_vpn_
 ');
     '/etc/tinc/icvpn/tinc-down':
       ensure  => file,
-      mode    => '0755';
+      mode    => '0755',
       content => inline_template('#!/bin/sh
 /sbin/ip addr del dev $INTERFACE <%= @ic_vpn_ip4 %>/16 broadcast 10.207.255.255
 /sbin/ip -6 addr del dev $INTERFACE <%= @ic_vpn_ip6 %>/96
