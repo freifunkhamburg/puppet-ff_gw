@@ -441,9 +441,12 @@ class ff_gw::bird($ff_net, $ff_mesh_net, $ff_as, $own_ipv4, $own_ipv6, $gw_do_ic
   }
   ->
   file {
-    '/etc/bird6.conf':
+    '/etc/bird/bird6.conf':
       ensure  => file,
-      content => template('ff_gw/etc/bird6.conf.erb');
+      content => template('ff_gw/etc/bird/bird6.conf.erb');
+    '/etc/bird6.conf':
+	  ensure => link,
+	  target => '/etc/bird/bird6.conf';
   }
   ~>
   service {
@@ -460,9 +463,12 @@ class ff_gw::bird($ff_net, $ff_mesh_net, $ff_as, $own_ipv4, $own_ipv6, $gw_do_ic
   }
   ->
   file {
-    '/etc/bird.conf':
+    '/etc/bird/bird.conf':
       ensure  => file,
-      content => template('ff_gw/etc/bird.conf.erb');
+      content => template('ff_gw/etc/bird/bird.conf.erb');
+    '/etc/bird.conf':
+	  ensure => link,
+	  target => '/etc/bird/bird.conf';
   }
   ~>
   service {
