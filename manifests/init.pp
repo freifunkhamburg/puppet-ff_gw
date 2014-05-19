@@ -1,4 +1,4 @@
-class ff_gw($ff_net, $ff_mesh_net, $ff_as, $mesh_mac, $gw_ipv4, $gw_ipv6, $secret_key, $vpn_ca_crt, $vpn_usr_crt, $vpn_usr_key, $dhcprange_start, $dhcprange_end, $gw_do_ic_peering = false) {
+class ff_gw($ff_net, $ff_mesh_net, $ff_as, $mesh_mac, $gw_ipv4, $gw_ipv6, $secret_key, $vpn_ca_crt, $vpn_usr_crt, $vpn_usr_key, $dhcprange_start, $dhcprange_end, $gw_do_ic_peering = false, $tinc_name, $tinc_keyfile, $ic_vpn_ip4, $ic_vpn_ip6) {
   class { 'ff_gw::software': }
   ->
   class { 'ff_gw::fastd':
@@ -19,8 +19,8 @@ class ff_gw($ff_net, $ff_mesh_net, $ff_as, $mesh_mac, $gw_ipv4, $gw_ipv6, $secre
   }
   ->
   class { 'ff_gw::vpn':
-	usr_crt => $vpn_usr_crt,
-	usr_key => $vpn_usr_key,
+    usr_crt => $vpn_usr_crt,
+    usr_key => $vpn_usr_key,
     ca_crt  => $vpn_ca_crt,
   }
   ->
@@ -35,6 +35,15 @@ class ff_gw($ff_net, $ff_mesh_net, $ff_as, $mesh_mac, $gw_ipv4, $gw_ipv6, $secre
     own_ipv4         => $gw_ipv4,
     own_ipv6         => $gw_ipv6,
     gw_do_ic_peering => $gw_do_ic_peering,
+  }
+
+  if $gw_do_ic_peering {
+    class { 'ff_gw::tinc':
+      tinc_name    => $tinc_name,
+      tinc_keyfile => $tinc_keyfile,
+      ic_vpn_ip4   => $ic_vpn_ip4,
+      ic_vpn_ip4   => $ic_vpn_ip6
+    }
   }
 }
 
@@ -69,6 +78,7 @@ class ff_gw::fastd($mesh_mac, $gw_ipv4, $gw_ipv6, $secret_key) {
       content => template('ff_gw/etc/fastd/ffhh-mesh-vpn/fastd.conf.erb');
     '/etc/fastd/ffhh-mesh-vpn/secret.conf':
       ensure  => file,
+      mode    => '0600',
       content => inline_template('secret "<%= @secret_key %>";');
     '/root/bin':
       ensure => directory;
@@ -457,6 +467,48 @@ class ff_gw::bird($ff_net, $ff_mesh_net, $ff_as, $own_ipv4, $own_ipv6, $gw_do_ic
   ~>
   service {
     'bird':
+      ensure  => running,
+      enable  => true,
+      require => Service['openvpn'],
+  }
+}
+
+class ff_gw::tinc($tinc_name, $tinc_keyfile = '/etc/tinc/rsa_key.priv', $ic_vpn_ip4, $ic_vpn_ip6, $version = 'present') {
+  package {
+    'tinc':
+      ensure => $version,
+  }
+  ->
+  vcsrepo { '/etc/tinc/icvpn':
+    ensure   => present,
+    provider => git,
+    source   => 'https://github.com/freifunk/icvpn',
+  }
+  ->
+  file {
+    '/etc/tinc/icvpn/tinc.conf':
+      ensure  => file,
+      content => template('ff_gw/etc/tinc/icvpn/tinc.conf.erb');
+    '/etc/tinc/icvpn/tinc-up':
+      ensure  => file,
+      mode    => '0755';
+      content => inline_template('#!/bin/sh
+/sbin/ip link set dev $INTERFACE up
+/sbin/ip addr add dev $INTERFACE <%= @ic_vpn_ip4 %>/16 broadcast 10.207.255.255
+/sbin/ip -6 addr add dev $INTERFACE <%= @ic_vpn_ip6 %>/96 preferred_lft 0
+');
+    '/etc/tinc/icvpn/tinc-down':
+      ensure  => file,
+      mode    => '0755';
+      content => inline_template('#!/bin/sh
+/sbin/ip addr del dev $INTERFACE <%= @ic_vpn_ip4 %>/16 broadcast 10.207.255.255
+/sbin/ip -6 addr del dev $INTERFACE <%= @ic_vpn_ip6 %>/96
+/sbin/ip link set dev $INTERFACE down
+');
+  }
+  ~>
+  service {
+    'tinc':
       ensure  => running,
       enable  => true,
       require => Service['openvpn'],

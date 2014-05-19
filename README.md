@@ -95,6 +95,13 @@ class { 'ff_gw':
     dhcprange_start => '10.112.30.2',
     dhcprange_end   => '10.112.31.254',
 
+    # only for inter-city VPN hosts
+	gw_do_ic_peering => true,
+	tinc_name        => 'hamburg01',
+	tinc_keyfile     => '/etc/tinc/rsa_key.priv',
+	ic_vpn_ip4       => '10.207.X.Y',
+	ic_vpn_ip6       => 'fec0::a:cf:X:Y',
+
     # secret credentials for fastd and vpn
     secret_key      => '...',
     vpn_ca_crt      => '-----BEGIN CERTIFICATE-----
