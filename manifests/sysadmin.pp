@@ -1,5 +1,7 @@
 # kitchen sink class for various small settings
 class ff_gw::sysadmin($zabbixserver = '127.0.0.1', $muninserver = '127.0.0.1', $sethostname = false, $setip = false, $accounts = {}) {
+
+  # first of all: fix my hostname
   if $sethostname and $setip {
     # set system hostname
     class { 'ff_gw::sysadmin::hostname':
@@ -8,13 +10,33 @@ class ff_gw::sysadmin($zabbixserver = '127.0.0.1', $muninserver = '127.0.0.1', $
     }
   }
 
+  # next important thing: set up apt repositories
+  #
+  class { '::apt':
+    always_apt_update => true
+  }
   # use backports repo
   apt::source { 'wheezy-backports':
     location => 'http://ftp.de.debian.org/debian/',
     release  => 'wheezy-backports',
     repos    => 'main',
   }
-  # some more packages
+  # batman repo
+  apt::source { 'universe-factory':
+    location   => 'http://repo.universe-factory.net/debian/',
+    release    => 'sid',
+    repos      => 'main',
+    key        => '16EF3F64CB201D9C',
+    key_server => 'pool.sks-keyservers.net',
+  }
+  # bird repo // TODO: no PGP key
+  apt::source { 'bird-network':
+    location   => 'http://bird.network.cz/debian/',
+    release    => 'wheezy',
+    repos      => 'main',
+  }
+
+  # then install some basic packages
   package {
     ['vim-nox', 'git', 'etckeeper', 'pv', 'curl', 'atop',
     'screen', 'tcpdump', 'rsync', 'file']:

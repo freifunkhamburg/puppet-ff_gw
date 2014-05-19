@@ -1,6 +1,4 @@
 class ff_gw($ff_net, $ff_mesh_net, $ff_as, $mesh_mac, $gw_ipv4, $gw_ipv6, $secret_key, $vpn_ca_crt, $vpn_usr_crt, $vpn_usr_key, $dhcprange_start, $dhcprange_end, $gw_do_ic_peering = false) {
-  class { 'ff_gw::apt': }
-  ->
   class { 'ff_gw::software': }
   ->
   class { 'ff_gw::fastd':
@@ -37,26 +35,6 @@ class ff_gw($ff_net, $ff_mesh_net, $ff_as, $mesh_mac, $gw_ipv4, $gw_ipv6, $secre
     own_ipv4         => $gw_ipv4,
     own_ipv6         => $gw_ipv6,
     gw_do_ic_peering => $gw_do_ic_peering,
-  }
-}
-
-class ff_gw::apt() {
-  class { '::apt':
-    always_apt_update => true
-  }
-  # batman repo
-  apt::source { 'universe-factory':
-    location   => 'http://repo.universe-factory.net/debian/',
-    release    => 'sid',
-    repos      => 'main',
-    key        => '16EF3F64CB201D9C',
-    key_server => 'pool.sks-keyservers.net',
-  }
-  # bird repo
-  apt::source { 'bird-network':
-    location   => 'http://bird.network.cz/debian/',
-    release    => 'wheezy',
-    repos      => 'main',
   }
 }
 
