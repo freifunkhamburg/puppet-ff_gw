@@ -23,6 +23,9 @@ peerings_v4:
   hamburg12:
     template: locals
     ip: 10.112.30.1
+  hamburg13:
+    template: locals
+    ip: 10.112.32.1
 
 # TODO: add this as a second param for intercity gateways
 ic_peerings_v4:
