@@ -427,7 +427,7 @@ exit 0';
   }
 }
 
-class ff_gw::bird($ff_net, $ff_mesh_net, $ff_as, $own_ipv4, $own_ipv6, $gw_do_ic_peering, $version = 'present') {
+class ff_gw::bird($ff_net, $ff_mesh_net, $ff_as, $own_ipv4, $own_ipv6, $gw_do_ic_peering, $ic_vpn_ip6, $version = 'present') {
   # read peering data from data file
   $module_path = get_module_path($module_name)
   $peeringdata = loadyaml("${module_path}/data/peering.yaml")
