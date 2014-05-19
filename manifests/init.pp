@@ -35,6 +35,7 @@ class ff_gw($ff_net, $ff_mesh_net, $ff_as, $mesh_mac, $gw_ipv4, $gw_ipv6, $secre
     own_ipv4         => $gw_ipv4,
     own_ipv6         => $gw_ipv6,
     gw_do_ic_peering => $gw_do_ic_peering,
+    ic_vpn_ip6       => $ic_vpn_ip6,
   }
 
   if $gw_do_ic_peering {
