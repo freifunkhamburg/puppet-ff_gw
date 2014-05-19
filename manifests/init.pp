@@ -486,6 +486,11 @@ class ff_gw::tinc($tinc_name, $tinc_keyfile = '/etc/tinc/rsa_key.priv', $ic_vpn_
   }
   ->
   file {
+    '/etc/tinc/nets.boot':
+      ensure  => file,
+	  content => '# all tinc networks -- managed by puppet
+icvpn
+';
     '/etc/tinc/icvpn/tinc.conf':
       ensure  => file,
       content => template('ff_gw/etc/tinc/icvpn/tinc.conf.erb');
