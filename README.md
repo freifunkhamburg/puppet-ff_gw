@@ -12,6 +12,17 @@ Also note that this is a really ugly puppet module that ignores all principles
 of modularity and interoperability; instead it follows the "Big ball of mud"
 design pattern.
 
+## Open Problems
+
+* The apt repository at http://bird.network.cz/debian/ does not use PGP
+  signatures, so `bird` and `bird6` will not be installed automatically.
+* Setting the hostname should occur before everything else. So either
+  do that manually or run a small `ff_gw::sysadmin`-only manifest before the
+  main `ff_gw` manifest.
+* User root requires ssh access to the git repository
+  `git@freifunk-gw01.hamburg.ccc.de:fastdkeys` --
+  so create a key and have it authorized beforehand.
+
 ## Usage
 
 Install as a puppet module, then include with node-specific parameters.
