@@ -1,5 +1,5 @@
 name    'puppet-ff_gw'
-version '0.2.0'
+version '0.3.0'
 license 'BSD 2-clause license'
 author 'Martin Schuette <info@mschuette.name>'
 dependency 'puppetlabs/apt', '>= 1.4.0'
