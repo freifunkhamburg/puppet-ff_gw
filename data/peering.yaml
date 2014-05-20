@@ -61,6 +61,10 @@ ic_peerings_v4:
     template: peers
     ip: 10.207.0.67
     as: 65529
+  Bremen1:
+    template: peers
+    ip: 10.207.0.196
+    as: 65196
   Chemnitz1:
     template: peers
     ip: 10.207.0.36
@@ -125,9 +129,9 @@ ic_peerings_v4:
     template: peers
     ip: 10.207.0.66
     as: 65055
-  Kiel4:
+  Kiel2:
     template: peers
-    ip: 10.207.0.58
+    ip: 10.207.0.52
     as: 65525
   Koblenz:
     template: peers
@@ -169,10 +173,6 @@ ic_peerings_v4:
     template: peers
     ip: 10.207.0.27
     as: 65513
-  Schwarzach1:
-    template: peers
-    ip: 10.207.0.56
-    as: 65527
   Treuenbrietzen:
     template: peers
     ip: 10.207.0.18
@@ -188,6 +188,10 @@ ic_peerings_v4:
   Wermelskirchen1:
     template: peers
     ip: 10.207.0.7
+    as: 65530
+  Wermelskirchen2:
+    template: peers
+    ip: 10.207.0.8
     as: 65530
 
 
@@ -246,6 +250,10 @@ ic_peerings_v6:
     template: peers
     ip: fec0::a:cf:0:60
     as: 65529
+  Bremen1:
+    template: peers
+    ip: fec0::a:cf:0:c4
+    as: 65196
   diac24:
     template: peers
     ip: fec0::a:cf:ac:16
@@ -302,15 +310,19 @@ ic_peerings_v6:
     template: peers
     ip: fec0::a:cf:0:83
     as: 65052
-  Schwarzach:
-    template: peers
-    ip: fec0::a:cf:0:56
-    as: 65527
   Weimar1:
     template: peers
     ip: fec0::a:cf:0:3
     as: 65042
+  Weimar2:
+    template: peers
+    ip: fec0::a:cf:0:4
+    as: 65042
   Wermelskirchen1:
     template: peers
     ip: fec0::a:cf:0:7
+    as: 65530
+  Wermelskirchen2:
+    template: peers
+    ip: fec0::a:cf:0:8
     as: 65530
