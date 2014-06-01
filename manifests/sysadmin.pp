@@ -42,6 +42,12 @@ class ff_gw::sysadmin($zabbixserver = '127.0.0.1', $muninserver = '127.0.0.1', $
     'screen', 'tcpdump', 'rsync', 'file', 'psmisc']:
       ensure => installed,
   }
+  # stop atop daemon (cf. https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=506191)
+  service { 'atop':
+    ensure  => stopped,
+    enable  => false,
+    require => Package['atop']
+  }
 
   # user accounts
   create_resources('account', $accounts)
