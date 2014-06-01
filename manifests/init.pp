@@ -446,29 +446,6 @@ class ff_gw::bird($ff_net, $ff_mesh_net, $ff_as, $own_ipv4, $own_ipv6, $gw_do_ic
   }
 
   package {
-    'bird6':
-      ensure => $version,
-  }
-  ->
-  file {
-    '/etc/bird/bird6.conf':
-      ensure  => file,
-      require => File['/etc/bird'],
-      content => template('ff_gw/etc/bird/bird6.conf.erb');
-    '/etc/bird6.conf':
-      ensure  => link,
-      target  => '/etc/bird/bird6.conf';
-  }
-  ~>
-  service {
-    'bird6':
-      ensure  => running,
-      enable  => true,
-      require => Service['openvpn'],
-  }
-
-
-  package {
     'bird':
       ensure => $version,
   }
@@ -489,6 +466,30 @@ class ff_gw::bird($ff_net, $ff_mesh_net, $ff_as, $own_ipv4, $own_ipv6, $gw_do_ic
       enable  => true,
       require => Service['openvpn'],
   }
+
+  package {
+    'bird6':
+      ensure  => $version,
+      require => Package['bird'],
+  }
+  ->
+  file {
+    '/etc/bird/bird6.conf':
+      ensure  => file,
+      require => File['/etc/bird'],
+      content => template('ff_gw/etc/bird/bird6.conf.erb');
+    '/etc/bird6.conf':
+      ensure  => link,
+      target  => '/etc/bird/bird6.conf';
+  }
+  ~>
+  service {
+    'bird6':
+      ensure  => running,
+      enable  => true,
+      require => Service['openvpn'],
+  }
+
 }
 
 class ff_gw::tinc($tinc_name, $tinc_keyfile, $ic_vpn_ip4, $ic_vpn_ip6, $version = 'present') {
