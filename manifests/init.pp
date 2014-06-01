@@ -1,4 +1,4 @@
-class ff_gw($ff_net, $ff_mesh_net, $ff_as, $mesh_mac, $gw_ipv4, $gw_ipv6, $secret_key, $vpn_ca_crt, $vpn_usr_crt, $vpn_usr_key, $dhcprange_start, $dhcprange_end, $gw_do_ic_peering = false, $tinc_name, $tinc_keyfile, $ic_vpn_ip4, $ic_vpn_ip6) {
+class ff_gw($ff_net, $ff_mesh_net, $ff_as, $mesh_mac, $gw_ipv4, $gw_ipv6, $secret_key, $vpn_ca_crt, $vpn_usr_crt, $vpn_usr_key, $dhcprange_start, $dhcprange_end, $gw_do_ic_peering = false, $tinc_name = false, $tinc_keyfile = '/etc/tinc/rsa_key.priv', $ic_vpn_ip4 = false, $ic_vpn_ip6 = false) {
   class { 'ff_gw::software': }
   ->
   class { 'ff_gw::fastd':
@@ -446,8 +446,8 @@ class ff_gw::bird($ff_net, $ff_mesh_net, $ff_as, $own_ipv4, $own_ipv6, $gw_do_ic
       ensure  => file,
       content => template('ff_gw/etc/bird/bird6.conf.erb');
     '/etc/bird6.conf':
-	  ensure => link,
-	  target => '/etc/bird/bird6.conf';
+      ensure => link,
+      target => '/etc/bird/bird6.conf';
   }
   ~>
   service {
@@ -468,8 +468,8 @@ class ff_gw::bird($ff_net, $ff_mesh_net, $ff_as, $own_ipv4, $own_ipv6, $gw_do_ic
       ensure  => file,
       content => template('ff_gw/etc/bird/bird.conf.erb');
     '/etc/bird.conf':
-	  ensure => link,
-	  target => '/etc/bird/bird.conf';
+      ensure => link,
+      target => '/etc/bird/bird.conf';
   }
   ~>
   service {
@@ -480,7 +480,15 @@ class ff_gw::bird($ff_net, $ff_mesh_net, $ff_as, $own_ipv4, $own_ipv6, $gw_do_ic
   }
 }
 
-class ff_gw::tinc($tinc_name, $tinc_keyfile = '/etc/tinc/rsa_key.priv', $ic_vpn_ip4, $ic_vpn_ip6, $version = 'present') {
+class ff_gw::tinc($tinc_name, $tinc_keyfile, $ic_vpn_ip4, $ic_vpn_ip6, $version = 'present') {
+  # note: class ff_gw needs default values and sets these to false.
+  # in case the tinc class is applied then these are the real checks,
+  # making sure the user set usable parameters:
+  validate_string($tinc_name)
+  validate_string($tinc_keyfile)
+  validate_string($ic_vpn_ip4)
+  validate_string($ic_vpn_ip6)
+
   package {
     'tinc':
       ensure => $version,
@@ -495,7 +503,7 @@ class ff_gw::tinc($tinc_name, $tinc_keyfile = '/etc/tinc/rsa_key.priv', $ic_vpn_
   file {
     '/etc/tinc/nets.boot':
       ensure  => file,
-	  content => '# all tinc networks -- managed by puppet
+      content => '# all tinc networks -- managed by puppet
 icvpn
 ';
     '/etc/tinc/icvpn/tinc.conf':
