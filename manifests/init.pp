@@ -28,6 +28,10 @@ class ff_gw($ff_net, $ff_mesh_net, $ff_as, $mesh_mac, $gw_ipv4, $gw_ipv6, $secre
   ->
   class { 'ff_gw::dnsmasq': }
   ->
+  class { 'ff_gw::dns_resolvconf':
+    gw_ipv4    => $gw_ipv4,
+  }
+  ->
   class { 'ff_gw::bird':
     ff_net           => $ff_net,
     ff_mesh_net      => $ff_mesh_net,
@@ -308,6 +312,19 @@ class ff_gw::dnsmasq() {
       ensure  => running,
       enable  => true,
       require => Service['openvpn'],
+  }
+}
+
+class ff_gw::dns_resolvconf($gw_ipv4) {
+  # add our own IP as first entry to /etc/resolv.conf
+  # try to preserve everything else as the default nameserver should be the fastest
+  augeas { 'edit_resolv_conf':
+      context => '/files/etc/resolv.conf',
+      changes => [
+          'ins nameserver before nameserver[1]',
+          "set nameserver[1] \"${gw_ipv4}\"",
+      ],
+      onlyif  => "get nameserver[1] != \"${gw_ipv4}\"",
   }
 }
 
