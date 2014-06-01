@@ -144,6 +144,30 @@ host <%= @ipaddress_eth0 %>
     '/etc/munin/plugins/udp-statistics':
       ensure => link,
       target => '/usr/share/munin/plugins/udp-statistics';
+    '/etc/munin/plugins/if_mullvad':
+      ensure => link,
+      target => '/usr/share/munin/plugins/if_';
+    '/etc/munin/plugins/if_err_mullvad':
+      ensure => link,
+      target => '/usr/share/munin/plugins/if_err_';
+    '/etc/munin/plugins/if_bat0':
+      ensure => link,
+      target => '/usr/share/munin/plugins/if_';
+    '/etc/munin/plugins/if_err_bat0':
+      ensure => link,
+      target => '/usr/share/munin/plugins/if_err_';
+    '/etc/munin/plugins/if_br-ffhh':
+      ensure => link,
+      target => '/usr/share/munin/plugins/if_';
+    '/etc/munin/plugins/if_err_br-ffhh':
+      ensure => link,
+      target => '/usr/share/munin/plugins/if_err_';
+    '/etc/munin/plugins/if_ffhh-mesh-vpn':
+      ensure => link,
+      target => '/usr/share/munin/plugins/if_';
+    '/etc/munin/plugins/if_err_ffhh-mesh-vpn':
+      ensure => link,
+      target => '/usr/share/munin/plugins/if_err_';
     # TODO: delete not needed plugins
     '/etc/munin/plugin-conf.d/vnstat':
       ensure  => file,
