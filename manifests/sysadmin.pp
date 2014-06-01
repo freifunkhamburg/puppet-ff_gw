@@ -192,19 +192,19 @@ class ff_gw::sysadmin::hostname($newname, $newip) {
   $alias = regsubst($newname, '^([^.]*).*$', '\1')
 
   # clean old names
-  if "$::hostname" != "$alias" {
-    host { "$hostname": ensure => absent }
+  if $::hostname != $alias {
+    host { $::hostname: ensure => absent }
   }
-  if "$::fqdn" != "$newname" {
-    host { "$fqdn":     ensure => absent }
+  if $::fqdn != $newname {
+    host { $::fqdn:     ensure => absent }
   }
 
   # rewrite config files:
-  host { "$newname":
+  host { $newname:
     ensure => present,
     ip     => $newip,
     alias  => $alias ? {
-      "$hostname" => undef,
+      $::hostname => undef,
       default     => $alias
     },
     before => Exec['hostname.sh'],
@@ -214,7 +214,7 @@ class ff_gw::sysadmin::hostname($newname, $newip) {
     ensure  => present,
     owner   => 'root',
     group   => 'root',
-    mode    => 644,
+    mode    => '0644',
     content => "${newname}\n",
   }
 
@@ -222,7 +222,7 @@ class ff_gw::sysadmin::hostname($newname, $newip) {
     ensure  => present,
     owner   => 'root',
     group   => 'root',
-    mode    => 644,
+    mode    => '0644',
     content => "${newname}\n",
     notify  => Exec['hostname.sh'],
   }
