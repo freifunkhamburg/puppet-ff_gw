@@ -222,7 +222,8 @@ class ff_gw::dhcpd($gw_ipv4, $dhcprange_start, $dhcprange_end) {
     '/etc/rsyslog.d/dhcpd.conf':
       ensure  => file,
       notify  => Service['rsyslog'],
-      content => 'local7.warn /var/log/dhcpd.log';
+      content => 'local7.warn /var/log/dhcpd.log
+& ~';
     '/etc/default/isc-dhcpd':
       ensure  => file,
       content => '# managed by puppet
