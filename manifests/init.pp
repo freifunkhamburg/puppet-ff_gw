@@ -436,6 +436,11 @@ class ff_gw::bird($ff_net, $ff_mesh_net, $ff_as, $own_ipv4, $own_ipv6, $gw_do_ic
   $ic_peerings_v4 = $peeringdata[ic_peerings_v4]
   $ic_peerings_v6 = $peeringdata[ic_peerings_v6]
 
+  # for compatibility with old & new bird versions
+  file { '/etc/bird':
+    ensure => directory;
+  }
+
   package {
     'bird6':
       ensure => $version,
@@ -444,10 +449,11 @@ class ff_gw::bird($ff_net, $ff_mesh_net, $ff_as, $own_ipv4, $own_ipv6, $gw_do_ic
   file {
     '/etc/bird/bird6.conf':
       ensure  => file,
+      require => File['/etc/bird'],
       content => template('ff_gw/etc/bird/bird6.conf.erb');
     '/etc/bird6.conf':
-      ensure => link,
-      target => '/etc/bird/bird6.conf';
+      ensure  => link,
+      target  => '/etc/bird/bird6.conf';
   }
   ~>
   service {
@@ -466,6 +472,7 @@ class ff_gw::bird($ff_net, $ff_mesh_net, $ff_as, $own_ipv4, $own_ipv6, $gw_do_ic
   file {
     '/etc/bird/bird.conf':
       ensure  => file,
+      require => File['/etc/bird'],
       content => template('ff_gw/etc/bird/bird.conf.erb');
     '/etc/bird.conf':
       ensure => link,
