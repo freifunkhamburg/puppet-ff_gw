@@ -228,6 +228,10 @@ peerings_v6:
     template: locals
     ip: fd51:2bb2:fd0d::501
     as: 65112
+  hamburg13:
+    template: locals
+    ip: fd51:2bb2:fd0d::401
+    as: 65112
 
 ic_peerings_v6:
   Augsburg1:
