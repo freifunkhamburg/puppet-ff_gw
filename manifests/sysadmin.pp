@@ -96,7 +96,7 @@ HostnameItem=${::hostname}
 
   # munin
   package {
-    [ 'munin-node', 'vnstat' ]:
+    [ 'munin-node', 'vnstat', 'bc' ]:
       ensure => installed,
   }
   ->
