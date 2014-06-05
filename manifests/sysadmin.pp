@@ -39,7 +39,7 @@ class ff_gw::sysadmin($zabbixserver = '127.0.0.1', $muninserver = '127.0.0.1', $
   # then install some basic packages
   package {
     ['vim-nox', 'git', 'etckeeper', 'pv', 'curl', 'atop',
-    'screen', 'tcpdump', 'rsync', 'file', 'psmisc']:
+    'screen', 'tcpdump', 'rsync', 'file', 'psmisc', 'ntpdate']:
       ensure => installed,
   }
   ->
@@ -52,6 +52,13 @@ class ff_gw::sysadmin($zabbixserver = '127.0.0.1', $muninserver = '127.0.0.1', $
   service { 'atop':
     ensure  => stopped,
     enable  => false,
+  }
+
+  cron {
+    'ntpdate-debian':
+      command => '/usr/sbin/ntpdate-debian',
+      user    => root,
+      minute  => '0';
   }
 
   # user accounts
