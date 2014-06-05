@@ -173,6 +173,10 @@ ic_peerings_v4:
     template: peers
     ip: 10.207.0.27
     as: 65513
+  RheinNeckar1:
+    template: peers
+    ip: 10.207.0.142
+    as: 76118
   Treuenbrietzen:
     template: peers
     ip: 10.207.0.18
