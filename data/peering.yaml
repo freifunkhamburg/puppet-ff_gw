@@ -173,6 +173,10 @@ ic_peerings_v4:
     template: peers
     ip: 10.207.0.27
     as: 65513
+  Ostholstein1:
+    template: peers
+    ip: 10.207.0.135
+    as: 65152
   RheinNeckar1:
     template: peers
     ip: 10.207.0.142
@@ -318,6 +322,10 @@ ic_peerings_v6:
     template: peers
     ip: fec0::a:cf:0:83
     as: 65052
+  Ostholstein1:
+    template: peers
+    ip: fec0::a:cf:0:87
+    as: 65152
   Weimar1:
     template: peers
     ip: fec0::a:cf:0:3
