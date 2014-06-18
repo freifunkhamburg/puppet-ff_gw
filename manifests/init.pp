@@ -396,6 +396,10 @@ exit 0';
     "/etc/openvpn/${vpnname}.conf":
       ensure => file,
       source => "puppet:///modules/ff_gw/etc/openvpn/${vpnname}.conf";
+    "/etc/openvpn/update-dnsmasq-forward":
+      ensure => file,
+      mode    => '0755',
+      source => "puppet:///modules/ff_gw/etc/openvpn/update-dnsmasq-forward";
   }
   ~>
   service { 'openvpn':
