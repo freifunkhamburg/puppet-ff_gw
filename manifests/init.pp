@@ -1,21 +1,21 @@
 class ff_gw(
-	$ff_net,
-	$ff_mesh_net,
-	$ff_as,
-	$mesh_mac,
-	$gw_ipv4, $gw_ipv4_netmask = '255.255.192.0',
-	$gw_ipv6, $gw_ipv6_prefixlen = '64',
-	$secret_key,                                      # for fastd
-	$vpn_provider = 'mullvad',                        # supported: mullvad or hideme
-	$vpn_ca_crt, $vpn_usr_crt, $vpn_usr_key,          # openvpn x.509 credentials
-	$vpn_usr_name = false,                            # openvpn user for auth-user-pass
-	$vpn_usr_pass = false,                            # openvpn password for auth-user-pass
-	$dhcprange_start, $dhcprange_end,
-	$gw_do_ic_peering = false,                        # configure inter city VPN
-	$tinc_name = false,
-	$tinc_keyfile = '/etc/tinc/rsa_key.priv',
-	$ic_vpn_ip4 = false,
-	$ic_vpn_ip6 = false
+  $ff_net,
+  $ff_mesh_net,
+  $ff_as,
+  $mesh_mac,
+  $gw_ipv4, $gw_ipv4_netmask = '255.255.192.0',
+  $gw_ipv6, $gw_ipv6_prefixlen = '64',
+  $secret_key,                                      # for fastd
+  $vpn_provider = 'mullvad',                        # supported: mullvad or hideme
+  $vpn_ca_crt, $vpn_usr_crt, $vpn_usr_key,          # openvpn x.509 credentials
+  $vpn_usr_name = false,                            # openvpn user for auth-user-pass
+  $vpn_usr_pass = false,                            # openvpn password for auth-user-pass
+  $dhcprange_start, $dhcprange_end,
+  $gw_do_ic_peering = false,                        # configure inter city VPN
+  $tinc_name = false,
+  $tinc_keyfile = '/etc/tinc/rsa_key.priv',
+  $ic_vpn_ip4 = false,
+  $ic_vpn_ip6 = false
 ) {
   class { 'ff_gw::software': }
   ->
@@ -128,9 +128,8 @@ class ff_gw::fastd($mesh_mac, $gw_ipv4, $gw_ipv4_netmask, $gw_ipv6, $gw_ipv6_pre
   # but I found none that is flexible enough to handle all our config lines
   augeas {
     "${br_if}-inet6":
-      context   => '/files/etc/network/interfaces',
-      show_diff => true,
-      changes   => [
+      context => '/files/etc/network/interfaces',
+      changes => [
         "set auto[child::1 = '${br_if}']/1 ${br_if}",
         "set iface[. = '${br_if}'][1] ${br_if}",
         "set iface[. = '${br_if}'][1]/family inet6",
@@ -143,9 +142,8 @@ class ff_gw::fastd($mesh_mac, $gw_ipv4, $gw_ipv4_netmask, $gw_ipv6, $gw_ipv6_pre
   ->
   augeas {
     "${br_if}-inet":
-      context   => '/files/etc/network/interfaces',
-      show_diff => true,
-      changes   => [
+      context => '/files/etc/network/interfaces',
+      changes => [
         "set iface[. = '${br_if}'][2] ${br_if}",
         "set iface[. = '${br_if}'][2]/family inet",
         "set iface[. = '${br_if}'][2]/method static",
@@ -156,10 +154,9 @@ class ff_gw::fastd($mesh_mac, $gw_ipv4, $gw_ipv4_netmask, $gw_ipv6, $gw_ipv6_pre
   ->
   # TODO: parameterize ffhh-mesh-vpn
   augeas {
-    "${bat_if}":
-      context   => '/files/etc/network/interfaces',
-      show_diff => true,
-      changes   => [
+    $bat_if:
+      context => '/files/etc/network/interfaces',
+      changes => [
         "set allow-hotplug[child::1 = '${bat_if}']/1 ${bat_if}",
         "set iface[. = '${bat_if}'] ${bat_if}",
         "set iface[. = '${bat_if}']/family inet6",
@@ -413,7 +410,7 @@ class ff_gw::vpn($provider, $ca_crt, $usr_crt, $usr_key, $usr_name, $usr_pass, $
 
   # TODO: maybe we should check that provider and auth methods match
   #       atm we trust the caller to give the right combination
-  if str2bool("$usr_name") {
+  if str2bool($usr_name) {
     # hideme config with user/pass file
     file {
       "/etc/openvpn/${provider}/auth.txt":
@@ -456,10 +453,10 @@ exit 0';
     "/etc/openvpn/${provider}.conf":
       ensure => file,
       source => "puppet:///modules/ff_gw/etc/openvpn/${provider}.conf";
-    "/etc/openvpn/update-dnsmasq-forward":
+    '/etc/openvpn/update-dnsmasq-forward':
       ensure => file,
-      mode    => '0755',
-      source => "puppet:///modules/ff_gw/etc/openvpn/update-dnsmasq-forward";
+      mode   => '0755',
+      source => 'puppet:///modules/ff_gw/etc/openvpn/update-dnsmasq-forward';
   }
   ~>
   service { 'openvpn':
