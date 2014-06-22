@@ -3,11 +3,12 @@ class ff_gw(
   $ff_mesh_net,
   $ff_as,
   $mesh_mac,
-  $gw_ipv4, $gw_ipv4_netmask = '255.255.192.0',
+  $gw_ipv4, $gw_ipv4_netmask   = '255.255.192.0',
   $gw_ipv6, $gw_ipv6_prefixlen = '64',
   $secret_key,                                      # for fastd
   $vpn_provider = 'mullvad',                        # supported: mullvad or hideme
-  $vpn_ca_crt, $vpn_usr_crt, $vpn_usr_key,          # openvpn x.509 credentials
+  $vpn_ca_crt   = false,                            # openvpn CA cert to verify server
+  $vpn_usr_crt  = false, $vpn_usr_key = false,      # openvpn x.509 credentials
   $vpn_usr_name = false,                            # openvpn user for auth-user-pass
   $vpn_usr_pass = false,                            # openvpn password for auth-user-pass
   $dhcprange_start, $dhcprange_end,
@@ -410,7 +411,7 @@ class ff_gw::vpn($provider, $ca_crt, $usr_crt, $usr_key, $usr_name, $usr_pass, $
 
   # TODO: maybe we should check that provider and auth methods match
   #       atm we trust the caller to give the right combination
-  if str2bool($usr_name) {
+  if $usr_name {
     # hideme config with user/pass file
     file {
       "/etc/openvpn/${provider}/auth.txt":
@@ -418,7 +419,7 @@ class ff_gw::vpn($provider, $ca_crt, $usr_crt, $usr_key, $usr_name, $usr_pass, $
         mode    => '0600',
         content => "$usr_name\n$usr_pass\n";
     }
-  } else {
+  } elsif $usr_crt {
     # mullvad config with x.509
     file {
       "/etc/openvpn/${provider}/client.crt":
