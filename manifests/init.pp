@@ -1,11 +1,13 @@
-class ff_gw($ff_net, $ff_mesh_net, $ff_as, $mesh_mac, $gw_ipv4, $gw_ipv6, $secret_key, $vpn_ca_crt, $vpn_usr_crt, $vpn_usr_key, $dhcprange_start, $dhcprange_end, $gw_do_ic_peering = false, $tinc_name = false, $tinc_keyfile = '/etc/tinc/rsa_key.priv', $ic_vpn_ip4 = false, $ic_vpn_ip6 = false) {
+class ff_gw($ff_net, $ff_mesh_net, $ff_as, $mesh_mac, $gw_ipv4, $gw_ipv4_netmask = '255.255.192.0', $gw_ipv6, $gw_ipv6_prefixlen = '64', $secret_key, $vpn_ca_crt, $vpn_usr_crt, $vpn_usr_key, $dhcprange_start, $dhcprange_end, $gw_do_ic_peering = false, $tinc_name = false, $tinc_keyfile = '/etc/tinc/rsa_key.priv', $ic_vpn_ip4 = false, $ic_vpn_ip6 = false) {
   class { 'ff_gw::software': }
   ->
   class { 'ff_gw::fastd':
-    mesh_mac   => $mesh_mac,
-    gw_ipv4    => $gw_ipv4,
-    gw_ipv6    => $gw_ipv6,
-    secret_key => $secret_key,
+    mesh_mac          => $mesh_mac,
+    gw_ipv4           => $gw_ipv4,
+    gw_ipv4_netmask   => $gw_ipv4_netmask,
+    gw_ipv6           => $gw_ipv6,
+    gw_ipv6_prefixlen => $gw_ipv6_prefixlen,
+    secret_key        => $secret_key,
   }
   ->
   class { 'ff_gw::dhcpd':
@@ -29,7 +31,7 @@ class ff_gw($ff_net, $ff_mesh_net, $ff_as, $mesh_mac, $gw_ipv4, $gw_ipv6, $secre
   class { 'ff_gw::dnsmasq': }
   ->
   class { 'ff_gw::dns_resolvconf':
-    gw_ipv4    => $gw_ipv4,
+    gw_ipv4 => $gw_ipv4,
   }
   ->
   class { 'ff_gw::bird':
@@ -71,12 +73,12 @@ class ff_gw::software {
   }
 }
 
-class ff_gw::fastd($mesh_mac, $gw_ipv4, $gw_ipv6, $secret_key) {
+class ff_gw::fastd($mesh_mac, $gw_ipv4, $gw_ipv4_netmask, $gw_ipv6, $gw_ipv6_prefixlen, $secret_key) {
   validate_re($mesh_mac, '^de:ad:be:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}$')
   # TODO: parameterize interface names
-  $br_if='br-ffhh'
-  $bat_if='bat0'
-  $mesh_if='ffhh-mesh-vpn'
+  $br_if   = 'br-ffhh'
+  $bat_if  = 'bat0'
+  $mesh_if = 'ffhh-mesh-vpn'
 
   file {
     '/etc/fastd/ffhh-mesh-vpn':
@@ -113,8 +115,8 @@ class ff_gw::fastd($mesh_mac, $gw_ipv4, $gw_ipv6, $secret_key) {
         "set iface[. = '${br_if}'][1]/family inet6",
         "set iface[. = '${br_if}'][1]/method static",
         "set iface[. = '${br_if}'][1]/bridge-ports none",
-        "set iface[. = '${br_if}'][1]/address $gw_ipv6",
-        "set iface[. = '${br_if}'][1]/netmask 64",
+        "set iface[. = '${br_if}'][1]/address ${gw_ipv6}",
+        "set iface[. = '${br_if}'][1]/netmask ${gw_ipv6_prefixlen}",
       ],
   }
   ->
@@ -126,8 +128,8 @@ class ff_gw::fastd($mesh_mac, $gw_ipv4, $gw_ipv6, $secret_key) {
         "set iface[. = '${br_if}'][2] ${br_if}",
         "set iface[. = '${br_if}'][2]/family inet",
         "set iface[. = '${br_if}'][2]/method static",
-        "set iface[. = '${br_if}'][2]/address $gw_ipv4",
-        "set iface[. = '${br_if}'][2]/netmask 255.255.192.0",
+        "set iface[. = '${br_if}'][2]/address ${gw_ipv4}",
+        "set iface[. = '${br_if}'][2]/netmask ${gw_ipv4_netmask}",
       ],
   }
   ->

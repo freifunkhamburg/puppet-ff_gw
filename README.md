@@ -14,8 +14,6 @@ design pattern.
 
 ## Open Problems
 
-* The current code overwrites `/etc/network/interfaces` -- this needs to be
-  improved.
 * The apt repository at http://bird.network.cz/debian/ does not use PGP
   signatures, so `bird` and `bird6` will not be installed automatically.
 * Setting the hostname should occur before everything else. So either
