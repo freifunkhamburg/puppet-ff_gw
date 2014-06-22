@@ -128,3 +128,18 @@ The verbose flag is optional and shows all changes.
 To be even more catious you can also add the `--noop` flag to only show changes
 but not apply them.
 
+## VPN providers
+
+The example above is written for a mullvad VPN using X.509 authentication.
+
+For hide.me with username/password auth use:
+```
+class { 'ff_gw':
+    # ...
+	vpn_provider => 'hideme',
+	vpn_usr_name => 'username',
+	vpn_usr_pass => 'vpn_password',
+    vpn_ca_crt   => '-----BEGIN CERTIFICATE-----
+MIIE ...
+-----END CERTIFICATE-----',
+```

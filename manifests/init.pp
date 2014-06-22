@@ -1,4 +1,22 @@
-class ff_gw($ff_net, $ff_mesh_net, $ff_as, $mesh_mac, $gw_ipv4, $gw_ipv4_netmask = '255.255.192.0', $gw_ipv6, $gw_ipv6_prefixlen = '64', $secret_key, $vpn_ca_crt, $vpn_usr_crt, $vpn_usr_key, $dhcprange_start, $dhcprange_end, $gw_do_ic_peering = false, $tinc_name = false, $tinc_keyfile = '/etc/tinc/rsa_key.priv', $ic_vpn_ip4 = false, $ic_vpn_ip6 = false) {
+class ff_gw(
+	$ff_net,
+	$ff_mesh_net,
+	$ff_as,
+	$mesh_mac,
+	$gw_ipv4, $gw_ipv4_netmask = '255.255.192.0',
+	$gw_ipv6, $gw_ipv6_prefixlen = '64',
+	$secret_key,                                      # for fastd
+	$vpn_provider = 'mullvad',                        # supported: mullvad or hideme
+	$vpn_ca_crt, $vpn_usr_crt, $vpn_usr_key,          # openvpn x.509 credentials
+	$vpn_usr_name = false,                            # openvpn user for auth-user-pass
+	$vpn_usr_pass = false,                            # openvpn password for auth-user-pass
+	$dhcprange_start, $dhcprange_end,
+	$gw_do_ic_peering = false,                        # configure inter city VPN
+	$tinc_name = false,
+	$tinc_keyfile = '/etc/tinc/rsa_key.priv',
+	$ic_vpn_ip4 = false,
+	$ic_vpn_ip6 = false
+) {
   class { 'ff_gw::software': }
   ->
   class { 'ff_gw::fastd':
@@ -21,9 +39,12 @@ class ff_gw($ff_net, $ff_mesh_net, $ff_as, $mesh_mac, $gw_ipv4, $gw_ipv4_netmask
   }
   ->
   class { 'ff_gw::vpn':
-    usr_crt => $vpn_usr_crt,
-    usr_key => $vpn_usr_key,
-    ca_crt  => $vpn_ca_crt,
+    provider => $vpn_provider,
+    usr_crt  => $vpn_usr_crt,
+    usr_key  => $vpn_usr_key,
+    ca_crt   => $vpn_ca_crt,
+    usr_name => $vpn_usr_name,
+    usr_pass => $vpn_usr_pass,
   }
   ->
   class { 'ff_gw::iptables': }
@@ -386,10 +407,32 @@ class ff_gw::radvd($own_ipv6) {
   }
 }
 
-class ff_gw::vpn($ca_crt, $usr_crt, $usr_key, $openvpn_version = '2.3.2-7~bpo70+1', $ensure = 'running') {
-  # TODO: this name is used in several places including dnsmasq
-  # and is even used for other providers, thus hard to change
-  $vpnname = 'mullvad'
+class ff_gw::vpn($provider, $ca_crt, $usr_crt, $usr_key, $usr_name, $usr_pass, $openvpn_version = '2.3.2-7~bpo70+1', $ensure = 'running') {
+  # TODO: note that even the hideme.conf uses the interface name 'mullvad',
+  #       because that interface is referenced elsewhere
+
+  # TODO: maybe we should check that provider and auth methods match
+  #       atm we trust the caller to give the right combination
+  if str2bool("$usr_name") {
+    # hideme config with user/pass file
+    file {
+      "/etc/openvpn/${provider}/auth.txt":
+        ensure  => file,
+        mode    => '0600',
+        content => "$usr_name\n$usr_pass\n";
+    }
+  } else {
+    # mullvad config with x.509
+    file {
+      "/etc/openvpn/${provider}/client.crt":
+        ensure  => file,
+        content => $usr_crt;
+      "/etc/openvpn/${provider}/client.key":
+        ensure  => file,
+        mode    => '0600',
+        content => $usr_key;
+    }
+  }
 
   package {
     'openvpn':
@@ -397,19 +440,12 @@ class ff_gw::vpn($ca_crt, $usr_crt, $usr_key, $openvpn_version = '2.3.2-7~bpo70+
   }
   ->
   file {
-    "/etc/openvpn/${vpnname}":
+    "/etc/openvpn/${provider}":
       ensure => directory;
-    "/etc/openvpn/${vpnname}/ca.crt":
+    "/etc/openvpn/${provider}/ca.crt":
       ensure  => file,
       content => $ca_crt;
-    "/etc/openvpn/${vpnname}/client.crt":
-      ensure  => file,
-      content => $usr_crt;
-    "/etc/openvpn/${vpnname}/client.key":
-      ensure  => file,
-      mode    => '0600',
-      content => $usr_key;
-    "/etc/openvpn/${vpnname}/mullvad-up":
+    "/etc/openvpn/${provider}/${provider}-up":
       ensure  => file,
       mode    => '0755',
       content => '#!/bin/sh
@@ -417,9 +453,9 @@ ip route replace 0.0.0.0/1 via $5 table 42
 ip route replace 128.0.0.0/1 via $5 table 42
 /etc/openvpn/update-dnsmasq-forward
 exit 0';
-    "/etc/openvpn/${vpnname}.conf":
+    "/etc/openvpn/${provider}.conf":
       ensure => file,
-      source => "puppet:///modules/ff_gw/etc/openvpn/${vpnname}.conf";
+      source => "puppet:///modules/ff_gw/etc/openvpn/${provider}.conf";
     "/etc/openvpn/update-dnsmasq-forward":
       ensure => file,
       mode    => '0755',
