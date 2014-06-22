@@ -73,6 +73,10 @@ class ff_gw::software {
 
 class ff_gw::fastd($mesh_mac, $gw_ipv4, $gw_ipv6, $secret_key) {
   validate_re($mesh_mac, '^de:ad:be:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}$')
+  # TODO: parameterize interface names
+  $br_if='br-ffhh'
+  $bat_if='bat0'
+  $mesh_if='ffhh-mesh-vpn'
 
   file {
     '/etc/fastd/ffhh-mesh-vpn':
@@ -95,39 +99,57 @@ class ff_gw::fastd($mesh_mac, $gw_ipv4, $gw_ipv6, $secret_key) {
       ensure => file,
       mode   => '0755',
       source => 'puppet:///modules/ff_gw/usr/local/bin/check_gateway';
-    '/etc/network/interfaces':
-      ensure  => file,
-      #
-      content => inline_template('# managed by puppet
-
-# The loopback network interface
-auto lo
-iface lo inet loopback
-
-# The primary network interface
-allow-hotplug eth0
-iface eth0 inet dhcp
-
-auto br-ffhh
-iface br-ffhh inet6 static
-  bridge-ports none
-  address <%= @gw_ipv6 %>
-  netmask 64
-iface br-ffhh inet static
-  address <%= @gw_ipv4 %>
-  netmask 255.255.192.0
-
-allow-hotplug bat0
-iface bat0 inet6 manual
-  pre-up modprobe batman-adv
-  pre-up batctl if add ffhh-mesh-vpn
-  up ip link set $IFACE up
-  post-up brctl addif br-ffhh $IFACE
-  post-up batctl it 10000
-  post-up /sbin/ip rule add from all fwmark 0x1 table 42
-  pre-down brctl delif br-ffhh $IFACE || true
-  down ip link set $IFACE down
-');
+  }
+  ->
+  # should use an abstraction layer like https://forge.puppetlabs.com/ajjahn/network,
+  # but I found none that is flexible enough to handle all our config lines
+  augeas {
+    "${br_if}-inet6":
+      context   => '/files/etc/network/interfaces',
+      show_diff => true,
+      changes   => [
+        "set auto[child::1 = '${br_if}']/1 ${br_if}",
+        "set iface[. = '${br_if}'][1] ${br_if}",
+        "set iface[. = '${br_if}'][1]/family inet6",
+        "set iface[. = '${br_if}'][1]/method static",
+        "set iface[. = '${br_if}'][1]/bridge-ports none",
+        "set iface[. = '${br_if}'][1]/address $gw_ipv6",
+        "set iface[. = '${br_if}'][1]/netmask 64",
+      ],
+  }
+  ->
+  augeas {
+    "${br_if}-inet":
+      context   => '/files/etc/network/interfaces',
+      show_diff => true,
+      changes   => [
+        "set iface[. = '${br_if}'][2] ${br_if}",
+        "set iface[. = '${br_if}'][2]/family inet",
+        "set iface[. = '${br_if}'][2]/method static",
+        "set iface[. = '${br_if}'][2]/address $gw_ipv4",
+        "set iface[. = '${br_if}'][2]/netmask 255.255.192.0",
+      ],
+  }
+  ->
+  # TODO: parameterize ffhh-mesh-vpn
+  augeas {
+    "${bat_if}":
+      context   => '/files/etc/network/interfaces',
+      show_diff => true,
+      changes   => [
+        "set allow-hotplug[child::1 = '${bat_if}']/1 ${bat_if}",
+        "set iface[. = '${bat_if}'] ${bat_if}",
+        "set iface[. = '${bat_if}']/family inet6",
+        "set iface[. = '${bat_if}']/method manual",
+        "set iface[. = '${bat_if}']/pre-up[1] 'modprobe batman-adv'",
+        "set iface[. = '${bat_if}']/pre-up[2] 'batctl if add ${mesh_if}'",
+        "set iface[. = '${bat_if}']/up 'ip link set \$IFACE up'",
+        "set iface[. = '${bat_if}']/post-up[1] 'brctl addif ${br_if} \$IFACE'",
+        "set iface[. = '${bat_if}']/post-up[2] 'batctl it 10000'",
+        "set iface[. = '${bat_if}']/post-up[3] '/sbin/ip rule add from all fwmark 0x1 table 42'",
+        "set iface[. = '${bat_if}']/pre-down 'brctl delif ${br_if} \$IFACE || true'",
+        "set iface[. = '${bat_if}']/down 'ip link set \$IFACE down'",
+      ];
   }
   ->
   vcsrepo { '/etc/fastd/ffhh-mesh-vpn/peers':
