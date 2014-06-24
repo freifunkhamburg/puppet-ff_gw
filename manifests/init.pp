@@ -444,13 +444,9 @@ class ff_gw::vpn($provider, $ca_crt, $usr_crt, $usr_key, $usr_name, $usr_pass, $
       ensure  => file,
       content => $ca_crt;
     "/etc/openvpn/${provider}/${provider}-up":
-      ensure  => file,
-      mode    => '0755',
-      content => '#!/bin/sh
-ip route replace 0.0.0.0/1 via $5 table 42
-ip route replace 128.0.0.0/1 via $5 table 42
-/etc/openvpn/update-dnsmasq-forward
-exit 0';
+      ensure => file,
+      mode   => '0755',
+      source => "puppet:///modules/ff_gw/etc/openvpn/${provider}/${provider}-up";
     "/etc/openvpn/${provider}.conf":
       ensure => file,
       source => "puppet:///modules/ff_gw/etc/openvpn/${provider}.conf";
