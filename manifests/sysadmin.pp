@@ -162,6 +162,18 @@ host <%= @ipaddress_eth0 %>
     '/etc/munin/plugins/udp-statistics':
       ensure => link,
       target => '/usr/share/munin/plugins/udp-statistics';
+    '/usr/share/munin/plugins/dhcp-pool':
+      ensure => file,
+      mode   => '0755',
+      source => 'puppet:///modules/ff_gw/usr/share/munin/plugins/dhcp-pool';
+    '/etc/munin/plugins/dhcp-pool':
+      ensure => link,
+      target => '/usr/share/munin/plugins/dhcp-pool';
+    '/etc/munin/plugin-conf.d/dhcp-pool':
+      ensure  => file,
+      content => '[dhcp-pool]
+env.leasefile /var/lib/dhcp/dhcpd.leases
+env.conffile /etc/dhcp/dhcpd.conf';
     '/etc/munin/plugins/if_mullvad':
       ensure => link,
       target => '/usr/share/munin/plugins/if_';
