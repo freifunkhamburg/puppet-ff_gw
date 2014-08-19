@@ -5,6 +5,7 @@ class ff_gw(
   $mesh_mac,
   $gw_ipv4, $gw_ipv4_netmask   = '255.255.192.0',
   $gw_ipv6, $gw_ipv6_prefixlen = '64',
+  $gw_pup_ipv6, $gw_pub_ipv6_prefixlen = '64',
   $secret_key,                                      # for fastd
   $vpn_provider = 'mullvad',                        # supported: mullvad or hideme
   $vpn_ca_crt   = false,                            # openvpn CA cert to verify server
@@ -26,6 +27,8 @@ class ff_gw(
     gw_ipv4_netmask   => $gw_ipv4_netmask,
     gw_ipv6           => $gw_ipv6,
     gw_ipv6_prefixlen => $gw_ipv6_prefixlen,
+    gw_pub_ipv6           => $gw_pub_ipv6,
+    gw_pub_ipv6_prefixlen => $gw_pub_ipv6_prefixlen,
     secret_key        => $secret_key,
   }
   ->
@@ -138,6 +141,7 @@ class ff_gw::fastd($mesh_mac, $gw_ipv4, $gw_ipv4_netmask, $gw_ipv6, $gw_ipv6_pre
         "set iface[. = '${br_if}'][1]/bridge-ports none",
         "set iface[. = '${br_if}'][1]/address ${gw_ipv6}",
         "set iface[. = '${br_if}'][1]/netmask ${gw_ipv6_prefixlen}",
+        "set iface[. = '${br_if}'][1]/post-up /sbin/ip -6 addr add ${gw_pub_ipv6}/${gw_pub_ipv6_prefixlen} dev $IFACE",
       ],
   }
   ->
