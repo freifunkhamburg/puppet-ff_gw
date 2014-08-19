@@ -397,7 +397,8 @@ class ff_gw::radvd($own_ipv6) {
     changes => [
       'set net.ipv4.ip_forward 1',
       'set net.ipv6.conf.all.forwarding 1',
-      'set net.ipv4.icmp_errors_use_inbound_ifaddr 1'
+      'set net.ipv4.icmp_errors_use_inbound_ifaddr 1',
+      'set net.ipv4.netfilter.ip_conntrack_max 65536'
     ],
   }
   ~>
@@ -504,6 +505,7 @@ class ff_gw::iptables {
 /sbin/ip route add unreachable default table 42
 /sbin/ip rule add from all fwmark 0x1 table 42
 /sbin/ip -6 rule add from all fwmark 0x1 table 42
+/bin/echo 8192 > /sys/module/nf_conntrack/parameters/hashsize
 exit 0';
   }
   ~>
