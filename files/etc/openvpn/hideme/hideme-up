@@ -1,5 +1,11 @@
 #!/bin/sh
 ip route replace 0.0.0.0/1 via $4 table 42
 ip route replace 128.0.0.0/1 via $4 table 42
+
+ip rule del priority 30000
+ip rule add priority 30000 from $4 table 42
+
+ip route flush cache
+
 /etc/openvpn/update-dnsmasq-forward
 exit 0

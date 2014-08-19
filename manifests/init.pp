@@ -392,7 +392,8 @@ class ff_gw::radvd($own_ipv6) {
     context => '/files/etc/sysctl.conf',
     changes => [
       'set net.ipv4.ip_forward 1',
-      'set net.ipv6.conf.all.forwarding 1'
+      'set net.ipv6.conf.all.forwarding 1',
+      'set net.ipv4.icmp_errors_use_inbound_ifaddr 1'
     ],
   }
   ~>
