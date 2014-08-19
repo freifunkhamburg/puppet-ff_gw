@@ -1,7 +1,8 @@
 #!/bin/bash
-INTERFACE=mullvad
+INTERFACE=mullvad        # Set to name of VPN interface
 shopt -s nullglob
 
+# Test whether gateway is connected to the outer world via VPN
 ping -q -I $INTERFACE 8.8.8.8 -c 4 -i 1 -W 5 >/dev/null 2>&1
 
 if test $? -eq 0; then
@@ -10,13 +11,27 @@ else
     NEW_STATE=off
 fi
 
+# Iterate through network interfaces in sys file system
 for MESH in /sys/class/net/*/mesh; do
+# Check whether gateway modus needs to be changed
 OLD_STATE="$(cat $MESH/gw_mode)"
 [ "$OLD_STATE" == "$NEW_STATE" ] && continue
-         echo $NEW_STATE > $MESH/gw_mode
-         echo 54MBit/54MBit > $MESH/gw_bandwidth
-         logger "batman gateway mode changed to $NEW_STATE"
+    echo $NEW_STATE > $MESH/gw_mode
+    echo 54MBit/54MBit > $MESH/gw_bandwidth
+    logger "batman gateway mode changed to $NEW_STATE"
+
+    # Check whether gateway modus has been deactivated
+    if [ "$NEW_STATE" == "off" ]; then
+        # Shutdown DHCP server to prevent renewal of leases
+        service isc-dhcp-server stop
+        # Shutdown radvd daemon to prevent advertisment of server as gateway
+        service radvd stop
+    fi
+
+    # Check whether gateway modus has been activated
+    if [ "$NEW_STATE" == "server" ]; then
+        # Restart DHCP server and radvd daemon
+        service isc-dhcp-server start
+        service radvd start
+    fi
 done
-
-# vim: noai:ts=4:sw=4:ff=unix:ft=text:fdm=marker
-
