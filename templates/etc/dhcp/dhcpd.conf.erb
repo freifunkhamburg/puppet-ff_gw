@@ -19,6 +19,7 @@ subnet 10.112.0.0 netmask 255.255.192.0 {
     # DNS: this gateway (<%= @gw_ipv4 %>) & srv01 (10.112.1.1)
     option domain-name-servers <%= @gw_ipv4 %>, 10.112.1.1;
     option routers <%= @gw_ipv4 %>;
+    option ntp-servers 10.112.16.1, 10.112.22.1;
 }
 
 include "/etc/dhcp/static.conf";
