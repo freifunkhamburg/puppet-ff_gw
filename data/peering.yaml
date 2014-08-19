@@ -251,7 +251,7 @@ ic_peerings_v6:
     ip: fec0::a:cf:0:19
     as: 65025
   Berlin1:
-    template: peers
+    template: upstream
     ip: fec0::a:cf:0:5
     as: 44194
   Bielefeld1:

@@ -1,63 +1,119 @@
-# managed by puppet
-#
-# the ff ip of the gateway
+table ibgp; # internal BGP peerings
+table ebgp; # external (icvpn) BGP peerings
+table freifunk; # kernel table 42 for routing from ff network
+
+define ownas = <%= @ff_as %>;
+
 router id <%= @own_ipv4 %>;
 
-# routing tables
-table ffhh;
+### functions ###
 
-# filter to check ulas
-function is_ula() {
-  return (net ~ [ fc00::/7{48,64} ]);
+# own networks
+function is_self_net() {
+  return net ~ [ fd51:2bb2:fd0d::/48+,
+    2001:bf7:180::/44+,
+    2001:bf7:190::/44+,
+    2001:bf7:200::/44+,
+    2001:bf7:210::/44+,
+    2001:bf7:220::/44+,
+    2001:bf7:230::/44+];
 }
 
-function is_self() {
-  return (proto = "static_ffhh");
+# freifunk ip ranges in general
+function is_freifunk() {
+  return net ~ [ fc00::/7{48,64},
+    2001:bf7::/32+];
 }
 
-filter ffhh_internal_export {
-  if (proto = "local_ffhh") then accept;
-  if (source != RTS_BGP) then reject;
-  if (is_ula() && proto != "static_ffhh") then accept;
-  else reject;
+function is_default() {
+  return net ~ [ ::0/0 ];
 }
 
-# don't use kernel's routes for bird, but export bird's routes to kernel
-protocol kernel {
-  scan time 20;  # Scan kernel routing table every 20 seconds
-  import none;  # Default is import all
+### kernel ###
+
+# synchronize from bird to main kernel routing table
+# nothing in the other direction
+# (do not sync a default route we received to the main routing table
+# as this might collide with the normal default route of the host)
+protocol kernel k_mast {
+  scan time 10;
+  import none;
+  export where !is_default();
+};
+
+# synchronize from birds freifunk table to kernel routing table 42
+# nothing in the other direction
+protocol kernel k_frei {
+  scan time 10;
+  table freifunk;
+  kernel table 42;
+  import none;
   export all;
-}
+};
 
-# This pseudo-protocol watches all interface up/down events.
+# this pseudo-protocol watches all interface up/down events
 protocol device {
-  scan time 10;  # Scan interfaces every 10 seconds
-}
-
-# define our routes
-protocol static static_ffhh {
-  table ffhh;
-  # reject route if announced from external
-  route fd51:2bb2:fd0d::/48 reject;
+    scan time 10;
 };
 
-protocol static local_ffhh {
-  table ffhh;
-  route fd51:2bb2:fd0d::/64 via "br-ffhh";
-};
+### pipes ###
 
-protocol pipe pipe_ffhh {
-  peer table ffhh;
-  import all;
+# sync nothing from main routing table to ebgp
+# sync routes (not own network) from ebgp to main routing table
+protocol pipe p_maintbl {
+  peer table ebgp;
+  import where !is_self_net();
   export none;
 };
 
-# template for internal routing
-template bgp locals {
-  table ffhh;
-  local as 65112;
-  source address <%= @own_ipv6 %>;
+# sync routes (not own network) from ebgp to ibgp
+# sync routes (all) from ibgp to ebgp
+protocol pipe p_ibgptbl {
+  table ebgp;
+  peer table ibgp;
   import all;
+  export where !is_self_net();
+};
+
+# sync routes (freifunk and default routes we got) from ibgp to freifunk
+# sync nothing from freifunk to ibgp
+protocol pipe p_freitbl {
+  table ibgp;
+  peer table freifunk;
+  import none;
+  export where is_freifunk() || is_default();
+};
+
+### static routes ###
+
+protocol static static_ffhh {  
+  route fd51:2bb2:fd0d::/48 reject;
+  route 2001:bf7:180::/44 reject;
+  route 2001:bf7:190::/44 reject;
+  route 2001:bf7:200::/44 reject;
+  route 2001:bf7:210::/44 reject;
+  route 2001:bf7:220::/44 reject;
+  route 2001:bf7:230::/44 reject;
+  table ebgp;
+};
+
+protocol static local_ffhh {
+  route fd51:2bb2:fd0d::/64 via "br-ffhh";
+  route 2001:bf7:180::/64 via "br-ffhh";
+  table freifunk;
+};
+
+### templates ###
+
+# template for same city freifunk gateways
+template bgp locals {
+  table ibgp;
+  local as ownas;
+  source address <%= @own_ipv6 %>;
+  import filter {
+    preference = 99;
+    accept;
+  };
   export where source = RTS_BGP;
   direct;
   next hop self;
@@ -70,13 +126,21 @@ protocol bgp <%= key %> from <%= hash["template"] %> {
 <% end -%><% end -%>
 
 <% if @gw_do_ic_peering -%>
-# icvpn template for hamburg03
+# template for icvpn gateways of other cities
 template bgp peers {
-  local as 65112;
+  table ebgp;
+  local as ownas;
   source address <%= @ic_vpn_ip6 %>;
-  table ffhh;
-  import where is_ula();
-  export where is_self() || (source = RTS_BGP);
+  # ignore routes for our own network
+  import where is_freifunk() && !is_self_net();
+  export where is_freifunk() || (source = RTS_BGP);
+  route limit 10000;
+};
+
+# template for upstream gateways
+template bgp upstream from peers {
+  # accept freifunk networks and default route
+  import where (is_freifunk() || is_default()) && !is_self_net();
 };
 
 <% @ic_peerings_v6.each_pair do |key, hash| -%><% if hash["ip"] != @own_ipv6 -%>
@@ -85,3 +149,4 @@ protocol bgp <%= key %> from <%= hash["template"] %> {
 };
 <% end -%><% end -%>
 <% end -%>
+
