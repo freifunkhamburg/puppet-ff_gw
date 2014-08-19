@@ -141,7 +141,7 @@ class ff_gw::fastd($mesh_mac, $gw_ipv4, $gw_ipv4_netmask, $gw_ipv6, $gw_ipv6_pre
         "set iface[. = '${br_if}'][1]/bridge-ports none",
         "set iface[. = '${br_if}'][1]/address ${gw_ipv6}",
         "set iface[. = '${br_if}'][1]/netmask ${gw_ipv6_prefixlen}",
-        "set iface[. = '${br_if}'][1]/post-up /sbin/ip -6 addr add ${gw_pub_ipv6}/${gw_pub_ipv6_prefixlen} dev $IFACE",
+        "set iface[. = '${br_if}'][1]/post-up '/sbin/ip -6 addr add ${gw_pub_ipv6}/${gw_pub_ipv6_prefixlen} dev \$IFACE'",
       ],
   }
   ->
