@@ -5,7 +5,7 @@ class ff_gw(
   $mesh_mac,
   $gw_ipv4, $gw_ipv4_netmask   = '255.255.192.0',
   $gw_ipv6, $gw_ipv6_prefixlen = '64',
-  $gw_pup_ipv6, $gw_pub_ipv6_prefixlen = '64',
+  $gw_pub_ipv6, $gw_pub_ipv6_prefixlen = '64',
   $secret_key,                                      # for fastd
   $vpn_provider = 'mullvad',                        # supported: mullvad or hideme
   $vpn_ca_crt   = false,                            # openvpn CA cert to verify server
@@ -98,7 +98,7 @@ class ff_gw::software {
   }
 }
 
-class ff_gw::fastd($mesh_mac, $gw_ipv4, $gw_ipv4_netmask, $gw_ipv6, $gw_ipv6_prefixlen, $secret_key) {
+class ff_gw::fastd($mesh_mac, $gw_ipv4, $gw_ipv4_netmask, $gw_ipv6, $gw_ipv6_prefixlen, $gw_pub_ipv6, $gw_pub_ipv6_prefixlen, $secret_key) {
   validate_re($mesh_mac, '^de:ad:be:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}$')
   # TODO: parameterize interface names
   $br_if   = 'br-ffhh'
