@@ -167,7 +167,6 @@ class ff_gw::fastd($mesh_mac, $gw_ipv4, $gw_ipv4_netmask, $gw_ipv6, $gw_ipv6_pre
         "set iface[. = '${bat_if}']/up 'ip link set \$IFACE up'",
         "set iface[. = '${bat_if}']/post-up[1] 'brctl addif ${br_if} \$IFACE'",
         "set iface[. = '${bat_if}']/post-up[2] 'batctl it 10000'",
-        "set iface[. = '${bat_if}']/post-up[3] '/sbin/ip rule add from all fwmark 0x1 table 42'",
         "set iface[. = '${bat_if}']/pre-down 'brctl delif ${br_if} \$IFACE || true'",
         "set iface[. = '${bat_if}']/down 'ip link set \$IFACE down'",
       ];
@@ -478,9 +477,12 @@ class ff_gw::iptables {
     '/etc/iptables/rules.v4':
       ensure => file,
       source => 'puppet:///modules/ff_gw/etc/iptables/rules.v4';
+    '/etc/iptables/rules.v6':
+      ensure => file,
+      source => 'puppet:///modules/ff_gw/etc/iptables/rules.v6';
     '/etc/rc.local':
       ensure  => file,
-      content => '#!/bin/sh -e
+      content => '#!/bin/sh
 # managed by puppet
 #
 # rc.local
@@ -496,6 +498,7 @@ class ff_gw::iptables {
 
 /sbin/ip route add unreachable default table 42
 /sbin/ip rule add from all fwmark 0x1 table 42
+/sbin/ip -6 rule add from all fwmark 0x1 table 42
 exit 0';
   }
   ~>
