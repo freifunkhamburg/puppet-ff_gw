@@ -21,7 +21,7 @@ GIT_REVISION=$(getCurrentVersion)
 
 # Automagically commit local changes
 # This preserves local changes
-git commit --quiet -m "CRON: auto commit"
+git commit --quiet -m "CRON: auto commit" > /dev/null
 
 # Pull latest changes from upstream
 git fetch --quiet
