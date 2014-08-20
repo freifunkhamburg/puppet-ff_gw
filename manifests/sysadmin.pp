@@ -12,11 +12,21 @@ class ff_gw::sysadmin($zabbixserver = '127.0.0.1', $muninserver = '127.0.0.1', $
   # next important thing: set up apt repositories
   class { 'ff_gw::sysadmin::software': }
 
+  # remove cronjob
   cron {
     'ntpdate-debian':
+      ensure  => absent,
       command => '/usr/sbin/ntpdate-debian',
       user    => root,
       minute  => '0';
+  }
+  # replace with a real NTP daemon
+  package { 'ntp':
+    ensure => present,
+  }
+  ~>
+  service { 'ntp':
+    ensure => true,
   }
 
   # user accounts
