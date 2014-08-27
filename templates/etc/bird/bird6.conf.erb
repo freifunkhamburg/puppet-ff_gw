@@ -1,14 +1,23 @@
-table ibgp; # internal BGP peerings
-table ebgp; # external (icvpn) BGP peerings
-table freifunk; # kernel table 42 for routing from ff network
+table ibgp;	# internal BGP peerings
+table ebgp;	# external (icvpn) BGP peerings
+table freifunk; # synced to kernel table 42 for routing from ff network
+table unreach;	# synced to kernel table 43 to intercept in cases there 
+		# is no default route via icvpn
 
+# quite self explanatory :)
 define ownas = <%= @ff_as %>;
 
+# the router id in bird is 32 bit wide and bird allows the IPv4 notation
+# to set it. quite confusing, but setting it to the gateway's IPv4 address
+# is a good approach here.
 router id <%= @own_ipv4 %>;
 
 ### functions ###
 
-# own networks
+# own networks as of http://wiki.freifunk.net/IPv6:Prefixe and
+# http://wiki.freifunk.net/IC-VPN
+# the '+' defines to not only match the prefix length given but
+# also any smaller prefixes (like 48 and 64)
 function is_self_net() {
   return net ~ [ fd51:2bb2:fd0d::/48+,
     2001:bf7:180::/44+,
@@ -20,11 +29,21 @@ function is_self_net() {
 }
 
 # freifunk ip ranges in general
+# this is the public address space assigned to the
+# Foerderverein freie Netzwerke e.V.
 function is_freifunk() {
-  return net ~ [ fc00::/7{48,64},
-    2001:bf7::/32+];
+  return net ~ [ 2001:bf7::/32+ ];
 }
 
+# unique local addresses
+# this is the non-public address range used within freifunk
+# communities and the IC-VPN
+function is_ula() {
+  return net ~ [ fc00::/7{48,64} ];
+}
+
+# default route
+# be careful with importing default routes from arbitrary peers
 function is_default() {
   return net ~ [ ::0/0 ];
 }
@@ -33,10 +52,10 @@ function is_default() {
 
 # synchronize from bird to main kernel routing table
 # nothing in the other direction
-# (do not sync a default route we received to the main routing table
-# as this might collide with the normal default route of the host)
+# do not sync a default route we received to the main routing table
+# as this might collide with the normal default route of the host
 protocol kernel k_mast {
-  scan time 10;
+  scan time 20;
   import none;
   export where !is_default();
 };
@@ -44,16 +63,26 @@ protocol kernel k_mast {
 # synchronize from birds freifunk table to kernel routing table 42
 # nothing in the other direction
 protocol kernel k_frei {
-  scan time 10;
+  scan time 20;
   table freifunk;
   kernel table 42;
   import none;
   export all;
 };
 
+# syncronize from birds unreach table to kernel routing table 43
+# nothing in the other direction
+protocol kernel k_unreach {
+  scan time 20;
+  table unreach;
+  kernel table 43;
+  import none;
+  export all;
+};
+
 # this pseudo-protocol watches all interface up/down events
 protocol device {
-    scan time 10;
+    scan time 20;
 };
 
 ### pipes ###
@@ -75,17 +104,20 @@ protocol pipe p_ibgptbl {
   export where !is_self_net();
 };
 
-# sync routes (freifunk and default routes we got) from ibgp to freifunk
+# sync routes (freifunk, ula and default routes we got) from ibgp to freifunk
 # sync nothing from freifunk to ibgp
 protocol pipe p_freitbl {
   table ibgp;
   peer table freifunk;
   import none;
-  export where is_freifunk() || is_default();
+  export where is_freifunk() || is_default() || is_ula();
 };
 
 ### static routes ###
 
+# here you should define unreachable (=reject) routes for your own
+# prefixes from http://wiki.freifunk.net/IC-VPN and
+# http://wiki.freifunk.net/IPv6:Prefixe
 protocol static static_ffhh {  
   route fd51:2bb2:fd0d::/48 reject;
   route 2001:bf7:180::/44 reject;
@@ -97,15 +129,27 @@ protocol static static_ffhh {
   table ebgp;
 };
 
+# these are the address ranges used in your network
+# note that these should be /64 networks in most cases from within
+# the above bigger ranges
 protocol static local_ffhh {
-  route fd51:2bb2:fd0d::/64 via "br-ffhh";
-  route 2001:bf7:180::/64 via "br-ffhh";
+  route fd51:2bb2:fd0d::/64 via "br-ffhh"; # replace br-ffhh with the name
+  route 2001:bf7:180::/64 via "br-ffhh";   # of your freifunk interface
   table freifunk;
+};
+
+# this defines an unreachable default route so that pakets are not forwarded
+# via the main routing table if no default route exists within table 42
+# note that this requires an additional rule within your policy routing
+protocol static unreachable_default {
+  route ::/0 reject;
+  table unreach;
 };
 
 ### templates ###
 
 # template for same city freifunk gateways
+# even the ones which do not have a direct IC-VPN connection
 template bgp locals {
   table ibgp;
   local as ownas;
@@ -132,15 +176,16 @@ template bgp peers {
   local as ownas;
   source address <%= @ic_vpn_ip6 %>;
   # ignore routes for our own network
-  import where is_freifunk() && !is_self_net();
-  export where is_freifunk() || (source = RTS_BGP);
+  import where (is_freifunk() || is_ula()) && !is_self_net();
+  export where (is_ula() || is_freifunk() || (source = RTS_BGP)) && !is_default();
   route limit 10000;
 };
 
 # template for upstream gateways
+# that are allowed to announce a default route to us
 template bgp upstream from peers {
   # accept freifunk networks and default route
-  import where (is_freifunk() || is_default()) && !is_self_net();
+  import where (is_freifunk() || is_ula() || is_default()) && !is_self_net();
 };
 
 <% @ic_peerings_v6.each_pair do |key, hash| -%><% if hash["ip"] != @own_ipv6 -%>
@@ -150,3 +195,5 @@ protocol bgp <%= key %> from <%= hash["template"] %> {
 <% end -%><% end -%>
 <% end -%>
 
+# this is for local peerings not managed by puppet
+include "*.peering6";

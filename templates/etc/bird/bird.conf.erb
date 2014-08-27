@@ -158,6 +158,17 @@ template bgp locals {
   next hop self;
 };
 
+### local gateways ###
+
+<% @peerings_v4.each_pair do |key, hash| -%><% if hash["ip"] != @own_ipv4 -%>
+protocol bgp <%= key %> from <%= hash["template"] %> {
+  neighbor <%= hash["ip"] %> as ownas;
+};
+<% end -%><% end -%>
+
+<% if @gw_do_ic_peering -%>
+### icvpn peerings ###
+
 # template for icvpn gateways of other cities
 template bgp peers {
   table ebgp;
@@ -168,20 +179,12 @@ template bgp peers {
   route limit 10000;
 };
 
-### local gateways ###
-
-<% @peerings_v4.each_pair do |key, hash| -%><% if hash["ip"] != @own_ipv4 -%>
-protocol bgp <%= key %> from <%= hash["template"] %> {
-  neighbor <%= hash["ip"] %> as ownas;
-};
-<% end -%><% end -%>
-
-### icvpn peerings ###
-
-<% if @gw_do_ic_peering -%>
 <% @ic_peerings_v4.each_pair do |key, hash| -%><% if hash["ip"] != @own_ipv4 -%>
 protocol bgp <%= key %> from <%= hash["template"] %> {
   neighbor <%= hash["ip"] %> as <%= hash["as"] %>;
 };
 <% end -%><% end -%>
 <% end -%>
+
+# this is for local peerings not managed by puppet
+include "*.peering"
