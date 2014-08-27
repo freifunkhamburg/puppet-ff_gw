@@ -23,12 +23,12 @@ OLD_STATE="$(cat $MESH/gw_mode)"
     # Check whether gateway modus has been deactivated
     if [ "$NEW_STATE" == "off" ]; then
         # Shutdown DHCP server to prevent renewal of leases
-        service isc-dhcp-server stop
+        /usr/sbin/service isc-dhcp-server stop
     fi
 
     # Check whether gateway modus has been activated
     if [ "$NEW_STATE" == "server" ]; then
-        # Restart DHCP server and radvd daemon
-        service isc-dhcp-server start
+        # Restart DHCP server
+        /usr/sbin/service isc-dhcp-server start
     fi
 done
