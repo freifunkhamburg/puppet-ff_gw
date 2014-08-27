@@ -506,6 +506,7 @@ class ff_gw::iptables {
 /sbin/ip rule add from all fwmark 0x1 table 42
 /sbin/ip -6 rule add from all fwmark 0x1 table 42
 /bin/echo 8192 > /sys/module/nf_conntrack/parameters/hashsize
+/sbin/ip -6 rule add priority 30000 from all fwmark 0x1 table 43
 exit 0';
   }
   ~>
