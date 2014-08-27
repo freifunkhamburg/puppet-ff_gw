@@ -201,6 +201,22 @@ ic_peerings_v4:
     template: peers
     ip: 10.207.0.8
     as: 65530
+  Dreilaendereck1:
+    template: peers
+    ip: 10.207.0.75
+    as: 65043
+  Flensburg1:
+    template: peers
+    ip: 10.207.0.129
+    as: 65056
+  Guetersloh1:
+    template: peers
+    ip: 10.207.0.132
+    as: 65533
+  Guetersloh4:
+    template: peers
+    ip: 10.207.0.134
+    as: 65533
 
 
 peerings_v6:
@@ -342,3 +358,19 @@ ic_peerings_v6:
     template: peers
     ip: fec0::a:cf:0:8
     as: 65530
+  Dreilaendereck1:
+    template: peers
+    ip: fec0::a:cf:0:be
+    as: 65043
+  Flensburg1:
+    template: peers
+    ip: fec0::a:cf:0:10
+    as: 65056
+  Guetersloh1:
+    template: peers
+    ip: fec0::a:cf:0:84
+    as: 65533
+  Guetersloh4:
+    template: peers
+    ip: fec0::a:cf:0:86
+    as: 65533
