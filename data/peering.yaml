@@ -17,9 +17,6 @@ peerings_v4:
   hamburg09:
     template: locals
     ip: 10.112.24.1
-  hamburg11:
-    template: locals
-    ip: 10.112.28.1
   hamburg12:
     template: locals
     ip: 10.112.30.1
@@ -217,7 +214,14 @@ ic_peerings_v4:
     template: peers
     ip: 10.207.0.134
     as: 65533
-
+  Magdeburg1:
+    template: peers
+    ip: 10.207.39.1
+    as: 65039
+  Magdeburg2:
+    template: peers
+    ip: 10.207.39.2
+    as: 65039
 
 peerings_v6:
   srv01:
@@ -306,6 +310,10 @@ ic_peerings_v6:
     template: peers
     ip: fec0::a:cf:0:51
     as: 65526
+  Kiel0:
+    template: peers
+    ip: fec0::a:cf:0:34
+    as: 65525
   Kiel1:
     template: peers
     ip: fec0::a:cf:0:35
@@ -374,3 +382,11 @@ ic_peerings_v6:
     template: peers
     ip: fec0::a:cf:0:86
     as: 65533
+  Magdeburg1:
+    template: peers
+    ip: fec0::a:cf:39:1
+    as: 65039
+  Magdeburg1:
+    template: peers
+    ip: fec0::a:cf:39:2
+    as: 65039
