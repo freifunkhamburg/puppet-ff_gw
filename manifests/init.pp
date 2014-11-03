@@ -179,7 +179,7 @@ class ff_gw::fastd($mesh_mac, $gw_ipv4, $gw_ipv4_netmask, $gw_ipv6, $gw_ipv6_pre
   vcsrepo { '/etc/fastd/ffhh-mesh-vpn/peers':
     ensure   => present,
     provider => git,
-    source   => 'git@freifunk-gw01.hamburg.ccc.de:fastdkeys',
+    source   => 'git@git.hamburg.freifunk.net:fastdkeys',
   }
 
   cron {
