@@ -20,7 +20,7 @@ design pattern.
   do that manually or run a small `ff_gw::sysadmin`-only manifest before the
   main `ff_gw` manifest.
 * User root requires ssh access to the git repository
-  `git@freifunk-gw01.hamburg.ccc.de:fastdkeys` --
+  `git@git.hamburg.freifunk.net:fastdkeys` --
   so create a key and have it authorized beforehand.
 
 ## Usage
